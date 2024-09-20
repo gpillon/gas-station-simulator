@@ -1,10 +1,10 @@
 frontend:
-  repository: ghcr.io/your-username/gas-station-frontend
+  repository: ghcr.io/gpillon/gas-station-frontend
   tag: latest
   socketServerUrl: http://backend:3000
 
 backend:
-  repository: ghcr.io/your-username/gas-station-backend
+  repository: ghcr.io/gpillon/gas-station-backend
   tag: latest
 
 service:
