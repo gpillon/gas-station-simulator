@@ -9,4 +9,4 @@ COPY dist ./dist
 EXPOSE 3000
 
 # Start the server
-CMD ["node", "dist/main"]
+CMD ["node", "/app/dist/main"]
