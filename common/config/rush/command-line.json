@@ -12,13 +12,21 @@
    */
   "commands": [
     {
+      "name": "start-dev",
+      "commandKind": "global",
+      "summary": "Start both backend and frontend in development mode",
+      "description": "This command starts both the backend and frontend services in development mode.",
+      "safeForSimultaneousRushProcesses": false,
+      "shellCommand": "node common/scripts/start-dev.js"
+    },
+    {
       /**
        * (Required) Determines the type of custom command.
        * Rush's "global" commands are invoked once for the entire repo.
        */
       "commandKind": "global",
 
-      "name": "start-dev",
+      "name": "start-dev-naa",
       "summary": "Start Apps in Dev mode",
       "description": "Run this command to start Apps in Devmode",
 
