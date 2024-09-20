@@ -30,7 +30,7 @@ jobs:
       - name: Rush Install
         run: node common/scripts/install-run-rush.js install
       - name: Rush rebuild
-        run: node common/scripts/install-run-rush.js rebuild --verbose --production
+        run: node common/scripts/install-run-rush.js rebuild --verbose
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2
