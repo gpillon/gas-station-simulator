@@ -9,7 +9,7 @@ COPY dist ./dist
 COPY package.json ./package.json
 COPY package-lock.json ./package-lock.json
 
-RUN cd /app && ls -la && npm ci
+RUN cd /app && ls -la && npm install --only=production
 
 # Expose port 3000
 EXPOSE 3000
