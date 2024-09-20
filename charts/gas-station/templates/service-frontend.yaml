@@ -12,18 +12,3 @@ spec:
   selector:
     {{- include "gas-station.selectorLabels" . | nindent 4 }}
     app: frontend
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "gas-station.fullname" . }}-backend
-spec:
-  type: ClusterIP
-  ports:
-    - port: 3000
-      targetPort: 3000
-      protocol: TCP
-      name: http
-  selector:
-    {{- include "gas-station.selectorLabels" . | nindent 4 }}
-    app: backend
