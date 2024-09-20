@@ -30,7 +30,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "REACT_APP_SOCKET_SERVER_URL=REACT_APP_SOCKET_SERVER_URL_PLACEHOLDER react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
