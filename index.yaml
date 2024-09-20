@@ -3,7 +3,7 @@ entries:
   gas-station:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-09-20T23:16:27.54518578Z"
+    created: "2024-09-20T23:24:54.8909624Z"
     description: A Helm chart for Kubernetes
     digest: 8d514b8a0cec0cc20b0bb32fee7338b065770f8de549b4921074f86386bbde7d
     name: gas-station
@@ -13,7 +13,7 @@ entries:
     version: 0.1.8
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-09-20T23:16:27.544949779Z"
+    created: "2024-09-20T23:24:54.890737961Z"
     description: A Helm chart for Kubernetes
     digest: ee060ac3a61193ef8ec8b93c72361af3310efa5031a9efa28347c0639c30ae53
     name: gas-station
@@ -23,7 +23,7 @@ entries:
     version: 0.1.7
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-09-20T23:16:27.544693169Z"
+    created: "2024-09-20T23:24:54.890494205Z"
     description: A Helm chart for Kubernetes
     digest: 44946e3d0d05155d6b17d632e889a71bd964b6695e813f0f248fa7c6c07d316e
     name: gas-station
@@ -33,7 +33,7 @@ entries:
     version: 0.1.6
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-09-20T23:16:27.5444581Z"
+    created: "2024-09-20T23:24:54.890241733Z"
     description: A Helm chart for Kubernetes
     digest: d666d1827d873eb03fbd6293550adfd8cd17363d872bfff4db48d9fa5f2f20b0
     name: gas-station
@@ -43,7 +43,7 @@ entries:
     version: 0.1.5
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-09-20T23:16:27.544214915Z"
+    created: "2024-09-20T23:24:54.889971949Z"
     description: A Helm chart for Kubernetes
     digest: 7fb0077d55275aa8d2218e52b08d80c1ecca30bd220b8e7f60d6f784985459a6
     name: gas-station
@@ -53,7 +53,7 @@ entries:
     version: 0.1.4
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-09-20T23:16:27.543978543Z"
+    created: "2024-09-20T23:24:54.889718815Z"
     description: A Helm chart for Kubernetes
     digest: e4849523c2992580b0397c08ce39bc6448337674f120b8c3691eccd501d89548
     name: gas-station
@@ -63,7 +63,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-09-20T23:16:27.543688632Z"
+    created: "2024-09-20T23:24:54.889472865Z"
     description: A Helm chart for Kubernetes
     digest: 1f1dbd4f5dc790eed806970866b077137d5065ff7dfb6d3fb136342af211ce74
     name: gas-station
@@ -73,7 +73,7 @@ entries:
     version: 0.1.2
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-09-20T23:16:27.543422654Z"
+    created: "2024-09-20T23:24:54.889220363Z"
     description: A Helm chart for Kubernetes
     digest: 47665fc1405c7c8fdb5f34d578edfc267bb07df516e3dce0b7f56803c1f86233
     name: gas-station
@@ -81,4 +81,4 @@ entries:
     urls:
     - https://gpillon.github.io/gas-station-simulator/gas-station-0.1.1.tgz
     version: 0.1.1
-generated: "2024-09-20T23:16:27.542975679Z"
+generated: "2024-09-20T23:24:54.888781433Z"
