@@ -32,7 +32,7 @@
   },
   "scripts": {
     "start": "cross-env PORT=3001 react-scripts start",
-    "build": "REACT_APP_SOCKET_HOST=REACT_APP_SOCKET_SERVER_URL_PLACEHOLDER react-scripts build",
+    "build": "PROD_BUILD=true REACT_APP_SOCKET_HOST=REACT_APP_SOCKET_SERVER_URL_PLACEHOLDER react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -16,8 +16,8 @@ const useWebSocket = () => {
 
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-
-    const newSocket = io(`${protocol}://${SOCKET_SERVER_HOST}`, {
+    const socket_url = process.env.PROD_BUILD === "true" ? `${protocol}://${SOCKET_SERVER_HOST}` : ``;
+    const newSocket = io(socket_url, {
       withCredentials: true,
       transports: ['websocket', 'polling'],
     });
