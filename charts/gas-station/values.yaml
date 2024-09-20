@@ -1,7 +1,7 @@
 frontend:
   repository: ghcr.io/gpillon/gas-station-simulator-frontend
   tag: latest
-  socketServerUrl: http://backend:3000
+  socketServerUrl: http://my-gas-station-backend:3000
 
 backend:
   repository: ghcr.io/gpillon/gas-station-simulator-backend

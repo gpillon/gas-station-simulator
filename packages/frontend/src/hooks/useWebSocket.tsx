@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { SimulationState } from '../types';
 
-const SOCKET_SERVER_URL = 'http://localhost:3000';
+const SOCKET_SERVER_URL = process.env.REACT_APP_SOCKET_SERVER_URL || 'http://localhost:3000';
 
 const useWebSocket = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
