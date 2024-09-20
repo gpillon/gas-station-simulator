@@ -17,12 +17,12 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-frontend
           image: "{{ .Values.frontend.repository }}:{{ .Values.frontend.tag }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
-            - name: REACT_APP_SOCKET_SERVER_URL
-              value: http://{{ include "gas-station.fullname" . }}-backend:3000
+            - name: REACT_APP_SOCKET_HOST
+              value: {{ include "gas-station.fullname" . }}-backend:3000
             - name: REACT_BACKEND_SERVER_URL
               value: http://{{ include "gas-station.fullname" . }}-backend:3000
               

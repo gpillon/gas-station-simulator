@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { SimulationState } from '../types';
 
-const SOCKET_SERVER_URL = process.env.REACT_APP_SOCKET_SERVER_URL || 'http://localhost:3000';
+const SOCKET_SERVER_HOST = process.env.REACT_APP_SOCKET_HOST || 'localhost:3000';
 
 const useWebSocket = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -15,7 +15,9 @@ const useWebSocket = () => {
   });
 
   useEffect(() => {
-    const newSocket = io(SOCKET_SERVER_URL, {
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+
+    const newSocket = io(`${protocol}://${SOCKET_SERVER_HOST}`, {
       withCredentials: true,
       transports: ['websocket', 'polling'],
     });

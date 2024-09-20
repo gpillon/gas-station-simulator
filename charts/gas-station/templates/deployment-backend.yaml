@@ -17,6 +17,6 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-backend
           image: "{{ .Values.backend.repository }}:{{ .Values.backend.tag }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000

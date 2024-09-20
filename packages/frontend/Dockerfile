@@ -35,7 +35,7 @@ RUN echo 'server { \
 EXPOSE 8080
 
 RUN printf '#!/bin/sh\n\
-sed -i "s|REACT_APP_SOCKET_SERVER_URL_PLACEHOLDER|$REACT_APP_SOCKET_SERVER_URL|g" /usr/share/nginx/html/static/js/*.js\n\
+sed -i "s|REACT_APP_SOCKET_SERVER_URL_PLACEHOLDER|$REACT_APP_SOCKET_HOST|g" /usr/share/nginx/html/static/js/*.js\n\
 sed -i "s|REACT_BACKEND_SERVER_URL_PLACEHOLDER|$REACT_BACKEND_SERVER_URL|g" /etc/nginx/conf.d/default.conf\n\
 nginx -g "daemon off;"\n' > /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
