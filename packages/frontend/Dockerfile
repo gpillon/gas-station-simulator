@@ -4,7 +4,7 @@ FROM nginx:alpine
 # Copy built assets
 COPY build /usr/share/nginx/html
 
-ENV REACT_APP_SOCKET_SERVER_URL=http://backend:3000
+ENV REACT_BACKEND_SERVER_URL=http://backend:3000
 
 # Create nginx configuration
 RUN echo 'server { \
@@ -16,14 +16,14 @@ RUN echo 'server { \
         try_files $uri $uri/ /index.html; \
     } \
     location /api { \
-        proxy_pass $REACT_APP_SOCKET_SERVER_URL; \
+        proxy_pass REACT_BACKEND_SERVER_URL_PLACEHOLDER; \
         proxy_http_version 1.1; \
         proxy_set_header Upgrade $http_upgrade; \
         proxy_set_header Connection "upgrade"; \
         proxy_set_header Host $host; \
     } \
     location /socket.io { \
-        proxy_pass $REACT_APP_SOCKET_SERVER_URL; \
+        proxy_pass REACT_BACKEND_SERVER_URL_PLACEHOLDER; \
         proxy_http_version 1.1; \
         proxy_set_header Upgrade $http_upgrade; \
         proxy_set_header Connection "upgrade"; \
@@ -36,6 +36,7 @@ EXPOSE 8080
 
 RUN printf '#!/bin/sh\n\
 sed -i "s|REACT_APP_SOCKET_SERVER_URL_PLACEHOLDER|$REACT_APP_SOCKET_SERVER_URL|g" /usr/share/nginx/html/static/js/*.js\n\
+sed -i "s|REACT_BACKEND_SERVER_URL_PLACEHOLDER|$REACT_BACKEND_SERVER_URL|g" /etc/nginx/conf.d/default.conf\n\
 nginx -g "daemon off;"\n' > /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
 # Use the shell script as the entrypoint
