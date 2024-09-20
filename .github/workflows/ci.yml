@@ -32,6 +32,17 @@ jobs:
       - name: Rush rebuild
         run: node common/scripts/install-run-rush.js rebuild --verbose
 
+      - name: Extract version or set default
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(git describe --tags --abbrev=0 --always)
+          if [[ $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta) ]]; then
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "version=latest" >> $GITHUB_OUTPUT
+          fi
+
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
@@ -44,7 +55,7 @@ jobs:
         with:
           context: ./packages/frontend
           push: true
-          tags: ${{ steps.meta.outputs.tags }}-frontend
+          tags: ghcr.io/${{ github.repository_owner }}/gas-station-simulator-frontend:${{ steps.get_version.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
   
       - name: Build and push Backend Docker image
@@ -52,5 +63,5 @@ jobs:
         with:
           context: ./packages/backend
           push: true
-          tags: ${{ steps.meta.outputs.tags }}-backend
+          tags: ghcr.io/${{ github.repository_owner }}/gas-station-simulator-backend:${{ steps.get_version.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
