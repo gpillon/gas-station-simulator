@@ -7,7 +7,7 @@ COPY dist ./dist
 COPY package.json ./package.json
 COPY package-lock.json ./package-lock.json
 
-RUN cd /app && ls -la && npm ci --no-fund --omit dev 
+RUN cd /app && ls -la && npm ci
 
 # Expose port 3000
 EXPOSE 3000
