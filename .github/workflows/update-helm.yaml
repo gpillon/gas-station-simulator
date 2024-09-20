@@ -10,6 +10,9 @@ on:
 
 jobs:
   update-helm-repo:
+    permissions:
+      contents: write
+      pages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
