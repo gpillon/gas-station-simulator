@@ -22,4 +22,7 @@ spec:
             - containerPort: 8080
           env:
             - name: REACT_APP_SOCKET_SERVER_URL
-              value: {{ .Values.frontend.socketServerUrl }}
+              value: {{ include "gas-station.fullname" . }}-backend:3000
+            - name: REACT_BACKEND_SERVER_URL
+              value: {{ include "gas-station.fullname" . }}-backend:3000
+              
