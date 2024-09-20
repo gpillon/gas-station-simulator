@@ -34,7 +34,7 @@ RUN echo 'server { \
 # Expose port 8080
 EXPOSE 8080
 
-RUN echo '#!/bin/sh\n\
+RUN echo -e '#!/bin/sh\n\
 sed -i "s|REACT_APP_SOCKET_SERVER_URL_PLACEHOLDER|$REACT_APP_SOCKET_SERVER_URL|g" /usr/share/nginx/html/static/js/*.js\n\
 nginx -g "daemon off;"' > /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
