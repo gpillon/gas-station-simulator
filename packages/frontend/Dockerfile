@@ -2,7 +2,7 @@
 FROM nginx:alpine
 
 # Copy built assets
-COPY packages/frontend/build /usr/share/nginx/html
+COPY build /usr/share/nginx/html
 
 ENV REACT_APP_SOCKET_SERVER_URL=http://localhost:3000
 

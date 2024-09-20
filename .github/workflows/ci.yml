@@ -47,6 +47,8 @@ jobs:
             echo "version=latest" >> $GITHUB_OUTPUT
           fi
 
+          tree -I 'node_modules|cache|test_*'
+
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:

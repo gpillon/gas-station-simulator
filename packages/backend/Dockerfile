@@ -3,7 +3,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY packages/backend/dist ./dist
+COPY dist ./dist
 
 RUN npm install
 
