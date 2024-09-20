@@ -4,7 +4,7 @@ FROM nginx:alpine
 # Copy built assets
 COPY build /usr/share/nginx/html
 
-ENV REACT_APP_SOCKET_SERVER_URL=http://localhost:3000
+ENV REACT_APP_SOCKET_SERVER_URL=http://backend:3000
 
 # Create nginx configuration
 RUN echo 'server { \
