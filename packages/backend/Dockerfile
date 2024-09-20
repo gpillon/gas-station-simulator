@@ -6,7 +6,7 @@ WORKDIR /app
 COPY dist ./dist
 COPY package.json ./package.json
 
-RUN cd /app && npm ci --only=production
+RUN cd /app && npm install --only=prod
 
 # Expose port 3000
 EXPOSE 3000
