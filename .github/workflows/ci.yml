@@ -34,7 +34,7 @@ jobs:
       - name: Rush Install
         run: node common/scripts/install-run-rush.js install
       - name: Rush rebuild
-        run: node common/scripts/install-run-rush.js rebuild --production --verbose
+        run: node common/scripts/install-run-rush.js rebuild --verbose
 
       - name: Extract version or set default
         id: get_version
@@ -46,6 +46,14 @@ jobs:
           else
             echo "version=latest" >> $GITHUB_OUTPUT
           fi
+
+      - name: Create package-locks.json
+        id: package_locks
+        shell: bash
+        run: |
+          cd packages/backend
+          npm i --package-lock-only
+          cd ../../
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2

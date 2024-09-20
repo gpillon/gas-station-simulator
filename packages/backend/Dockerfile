@@ -5,8 +5,8 @@ WORKDIR /app
 
 COPY dist ./dist
 COPY package.json ./package.json
-
-RUN cd /app && npm install --only=prod
+COPY package-lock.json ./package-lock.json
+RUN npm ci --no-fund --omit dev 
 
 # Expose port 3000
 EXPOSE 3000
