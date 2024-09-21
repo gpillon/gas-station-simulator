@@ -73,5 +73,9 @@ export class GasStationGateway
       payload.fuelType,
     );
     // Simulate refueling completion
+    setTimeout(() => {
+      console.log('Refueling complete');
+      client.emit('refuelingComplete');
+    }, 5000); // 5 seconds for demonstration, adjust as needed
   }
 }

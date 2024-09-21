@@ -32,17 +32,9 @@ export class GasStationService {
       this.isSimulationRunning = true;
       this.simulationInterval = setInterval(() => {
         this.updateSimulation();
-        this.stateUpdates.next({
-          ...this.state,
-          isSimulationRunning: this.isSimulationRunning,
-        });
-        if (this.hasStateChanged()) {
-          this.stateUpdates.next({
-            ...this.state,
-            isSimulationRunning: this.isSimulationRunning,
-          });
-        }
+        this.emitStateUpdate();
       }, 100);
+      this.emitStateUpdate(); // Emit immediately after starting
     }
   }
 
@@ -50,11 +42,8 @@ export class GasStationService {
     if (this.simulationInterval) {
       clearInterval(this.simulationInterval);
       this.simulationInterval = null;
-      this.state.isSimulationRunning = false;
-      this.stateUpdates.next({
-        ...this.state,
-        isSimulationRunning: this.isSimulationRunning,
-      });
+      this.isSimulationRunning = false;
+      this.emitStateUpdate(); // Emit immediately after stopping
     }
   }
 
@@ -82,6 +71,7 @@ export class GasStationService {
     this.totalWaitTime = 0;
 
     this.stateUpdates.next(this.state);
+    this.emitStateUpdate();
   }
 
   getState(): SimulationState {
@@ -201,8 +191,7 @@ export class GasStationService {
         this.state.trucksServed++;
       }
 
-      const fuelAmount =
-        pump.currentVehicle.tankCapacity;
+      const fuelAmount = pump.currentVehicle.tankCapacity;
       this.state.totalRevenue += fuelAmount * 1.74;
 
       // Update fuel dispensed
@@ -236,5 +225,12 @@ export class GasStationService {
         this.stateUpdates.next(this.state);
       }
     }
+  }
+
+  private emitStateUpdate() {
+    this.stateUpdates.next({
+      ...this.state,
+      isSimulationRunning: this.isSimulationRunning,
+    });
   }
 }
