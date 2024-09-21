@@ -69,7 +69,9 @@ interface PumpPanelProps {
     }, 2000);
   };
 
-  const handleFuelSelect = (fuel: string) => {
+  const handleFuelSelect = (fuelType: string) => {
+    setFuelType(fuelType);
+    const fuel = fuelType.replace('-', ''); // Remove the dash
     setFuelType(fuel);
     startRefueling(fuel);
   };

@@ -8,7 +8,7 @@ WORKDIR /app
 COPY dist ./dist
 COPY package.json ./package.json
 
-RUN cd /app && ls -la && npm install --omit=dev
+RUN cd /app && npm install --omit=dev
 
 # Expose port 3000
 EXPOSE 3000

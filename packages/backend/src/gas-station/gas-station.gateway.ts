@@ -47,7 +47,7 @@ export class GasStationGateway
   }
 
   @SubscribeMessage('command')
-  handleCommand(client: Socket, command: string) {
+  handleCommand(_client: Socket, command: string) {
     console.log(`Received command: ${command}`);
     switch (command) {
       case 'START':
@@ -71,12 +71,7 @@ export class GasStationGateway
     this.gasStationService.startRefueling(
       parseInt(payload.pumpId),
       payload.fuelType,
-      //payload.paymentMethod,
     );
-
     // Simulate refueling completion
-    setTimeout(() => {
-      client.emit('refuelingComplete');
-    }, 5000); // 5 seconds for demonstration, adjust as needed
   }
 }

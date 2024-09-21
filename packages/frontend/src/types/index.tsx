@@ -17,6 +17,15 @@ export interface Vehicle {
     pumps: Pump[];
     queue: Vehicle[];
     vehiclesServed: number;
+    carsServed: number;
+    trucksServed: number;
     averageWaitTime: number;
     totalRevenue: number;
+    isSimulationRunning: boolean;
+    fuelDispensed: {
+      regular: number;
+      midgrade: number;
+      premium: number;
+      diesel: number;
+    };
   }

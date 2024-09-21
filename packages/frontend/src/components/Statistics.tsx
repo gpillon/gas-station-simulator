@@ -29,7 +29,7 @@ const Statistics: React.FC<Props> = ({ state }) => {
           </div>
           <div className="stat-item">
             <p className="text-sm text-gray-600">Total Revenue</p>
-            <p className="text-2xl font-bold text-blue-600">${state.totalRevenue.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-blue-600">{state.totalRevenue.toFixed(2)}€</p>
           </div>
         </div>
       </div>

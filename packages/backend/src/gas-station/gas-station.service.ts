@@ -5,9 +5,11 @@ import { Subject } from 'rxjs';
 @Injectable()
 export class GasStationService {
   private state: SimulationState;
+  private previousState: SimulationState;
   private totalWaitTime: number = 0;
   private simulationInterval: NodeJS.Timeout | null = null;
   public stateUpdates = new Subject<SimulationState>();
+  private isSimulationRunning: boolean = false;
 
   constructor() {
     this.resetSimulation();
@@ -18,15 +20,28 @@ export class GasStationService {
     if (pump && pump.status === 'busy' && !pump.selectedGasoline) {
       pump.selectedGasoline = gasolineType;
       pump.status = 'fueling';
-      this.stateUpdates.next(this.state);
+      this.stateUpdates.next({
+        ...this.state,
+        isSimulationRunning: this.isSimulationRunning,
+      });
     }
   }
 
   startSimulation() {
     if (!this.simulationInterval) {
+      this.isSimulationRunning = true;
       this.simulationInterval = setInterval(() => {
         this.updateSimulation();
-        this.stateUpdates.next(this.state);
+        this.stateUpdates.next({
+          ...this.state,
+          isSimulationRunning: this.isSimulationRunning,
+        });
+        if (this.hasStateChanged()) {
+          this.stateUpdates.next({
+            ...this.state,
+            isSimulationRunning: this.isSimulationRunning,
+          });
+        }
       }, 100);
     }
   }
@@ -35,6 +50,11 @@ export class GasStationService {
     if (this.simulationInterval) {
       clearInterval(this.simulationInterval);
       this.simulationInterval = null;
+      this.state.isSimulationRunning = false;
+      this.stateUpdates.next({
+        ...this.state,
+        isSimulationRunning: this.isSimulationRunning,
+      });
     }
   }
 
@@ -47,8 +67,17 @@ export class GasStationService {
       ],
       queue: [],
       vehiclesServed: 0,
+      carsServed: 0,
+      trucksServed: 0,
       averageWaitTime: 0,
       totalRevenue: 0,
+      isSimulationRunning: false,
+      fuelDispensed: {
+        regular: 0,
+        midgrade: 0,
+        premium: 0,
+        diesel: 0,
+      },
     };
     this.totalWaitTime = 0;
 
@@ -60,8 +89,10 @@ export class GasStationService {
   }
 
   private updateSimulation() {
+    this.previousState = JSON.parse(JSON.stringify(this.state));
+
     // Add new vehicles to the queue
-    if (this.state.queue.length < 12 && Math.random() < 0.03) {
+    if (this.state.queue.length < 9 && Math.random() < 0.03) {
       this.addVehicleToQueue();
     }
 
@@ -72,7 +103,7 @@ export class GasStationService {
         if (
           pump.currentVehicle.currentFuel >= pump.currentVehicle.tankCapacity
         ) {
-          this.finishVehicle(pump);
+          this.finishRefueling(pump, false); // Don't emit update for each pump
         }
       }
     });
@@ -83,14 +114,14 @@ export class GasStationService {
         if (
           pump.currentVehicle.currentFuel >= pump.currentVehicle.tankCapacity
         ) {
-          this.finishVehicle(pump);
+          this.finishRefueling(pump);
         }
       }
     });
 
     this.state.pumps.forEach((pump) => {
       if (pump.status === 'idle') {
-        this.startFueling(pump);
+        this.startRefueling(pump.id, pump.selectedGasoline);
       }
     });
 
@@ -106,6 +137,18 @@ export class GasStationService {
         pump.currentVehicle = vehicle;
       }
     }
+
+    // Check if state has changed
+    if (this.hasStateChanged()) {
+      this.stateUpdates.next({
+        ...this.state,
+        isSimulationRunning: this.isSimulationRunning,
+      });
+    }
+  }
+
+  private hasStateChanged(): boolean {
+    return JSON.stringify(this.state) !== JSON.stringify(this.previousState);
   }
 
   private addVehicleToQueue() {
@@ -122,43 +165,6 @@ export class GasStationService {
     };
 
     this.state.queue.push(newVehicle);
-  }
-
-  private finishVehicle(pump: Pump) {
-    if (pump.currentVehicle) {
-      this.state.vehiclesServed++;
-      this.state.totalRevenue += pump.currentVehicle.tankCapacity * 1.74; // Assuming $2 per unit of fuel
-      pump.status = 'idle';
-      pump.currentVehicle = null;
-      pump.selectedGasoline = null;
-    }
-  }
-
-  private startFueling(pump: Pump) {
-    if (this.state.queue.length > 0) {
-      const vehicle = this.state.queue.shift();
-      if (vehicle) {
-        const waitTime = (Date.now() - vehicle.arrivalTime) / 60000; // Convert to minutes
-        this.totalWaitTime += waitTime;
-        this.state.averageWaitTime = this.state.vehiclesServed
-          ? this.totalWaitTime / this.state.vehiclesServed
-          : 0;
-
-        console.log(`Vehicle ${vehicle.id} started fueling:`);
-        console.log(`  Wait time: ${waitTime.toFixed(2)} minutes`);
-        console.log(
-          `  Total wait time: ${this.totalWaitTime.toFixed(2)} minutes`,
-        );
-        console.log(`  Vehicles served: ${this.state.vehiclesServed}`);
-        console.log(
-          `  New average wait time: ${this.state.averageWaitTime.toFixed(2)} minutes`,
-        );
-        console.log(`  Total revenue: ${this.state.totalRevenue.toFixed(2)}`);
-
-        pump.status = 'busy';
-        pump.currentVehicle = vehicle;
-      }
-    }
   }
 
   startRefueling(
@@ -179,18 +185,56 @@ export class GasStationService {
         this.finishRefueling(pump);
       }, 5000); // 5 seconds for demonstration, adjust as needed
 
-      this.stateUpdates.next(this.state);
+      this.stateUpdates.next({
+        ...this.state,
+        isSimulationRunning: this.isSimulationRunning,
+      });
     }
   }
 
-  private finishRefueling(pump: Pump) {
+  private finishRefueling(pump: Pump, emitUpdate: boolean = true) {
     if (pump.currentVehicle) {
       this.state.vehiclesServed++;
-      this.state.totalRevenue += pump.currentVehicle.tankCapacity * 1.74; // Assuming $2 per unit of fuel
+      if (pump.currentVehicle.type === 'Car') {
+        this.state.carsServed++;
+      } else {
+        this.state.trucksServed++;
+      }
+
+      const fuelAmount =
+        pump.currentVehicle.tankCapacity;
+      this.state.totalRevenue += fuelAmount * 1.74;
+
+      // Update fuel dispensed
+      console.log('Finishing refueling', pump.selectedGasoline);
+      if (pump.selectedGasoline) {
+        const fuelType = pump.selectedGasoline
+          .toLowerCase()
+          .replace('-', '') as keyof typeof this.state.fuelDispensed;
+        this.state.fuelDispensed[fuelType] += fuelAmount;
+        console.log(
+          'Fuel dispensed',
+          fuelType,
+          this.state.fuelDispensed,
+          pump.selectedGasoline.toLowerCase(),
+          pump.selectedGasoline.toLowerCase().replace('-', ''),
+          fuelAmount,
+          this.state.totalRevenue,
+        );
+      }
+
+      const waitTime = (Date.now() - pump.currentVehicle.arrivalTime) / 60000;
+      this.totalWaitTime += waitTime;
+      this.state.averageWaitTime =
+        this.totalWaitTime / this.state.vehiclesServed;
+
       pump.status = 'idle';
       pump.currentVehicle = null;
       pump.selectedGasoline = null;
-      this.stateUpdates.next(this.state);
+
+      if (emitUpdate && this.hasStateChanged()) {
+        this.stateUpdates.next(this.state);
+      }
     }
   }
 }

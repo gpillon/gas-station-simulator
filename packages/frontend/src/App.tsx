@@ -1,7 +1,7 @@
 import React from 'react';
+import Controls from './components/Controls';
 import GasStation from './components/GasStation';
 import Statistics from './components/Statistics';
-import Controls from './components/Controls';
 import useWebSocket from './hooks/useWebSocket';
 
 const App: React.FC = () => {
@@ -15,7 +15,10 @@ const App: React.FC = () => {
           <h1 className="text-4xl font-bold text-center text-gray-900 mb-8">Gas Station Simulator</h1>
           <GasStation state={state} onSelectGasoline={selectGasoline} socket={socket} />
           <Statistics state={state} />
-          <Controls sendCommand={sendCommand} />
+          <Controls 
+          sendCommand={sendCommand}
+          isSimulationRunning={state.isSimulationRunning}
+        />
         </div>
       </div>
     </div>
