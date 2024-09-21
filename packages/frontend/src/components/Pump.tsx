@@ -25,6 +25,17 @@ const Pump: React.FC<Props> = ({ pump, onSelectGasoline, socket }) => {
     { name: 'Diesel', icon: dieselIcon },
   ];
 
+  const isCompatibleFuel = (vehicleType: string, fuelType: string) => {
+    return (vehicleType === 'Car' && fuelType !== 'Diesel') || (vehicleType === 'Truck' && fuelType === 'Diesel');
+  };
+
+  const getVehicleBackgroundColor = () => {
+    if (pump.currentVehicle && pump.selectedGasoline) {
+      return isCompatibleFuel(pump.currentVehicle.type, pump.selectedGasoline) ? 'bg-green-200' : 'bg-red-200';
+    }
+    return '';
+  };
+
   return (
     <>
       <div className="pump bg-white shadow-md rounded-lg p-4">
@@ -35,9 +46,9 @@ const Pump: React.FC<Props> = ({ pump, onSelectGasoline, socket }) => {
           Pump {pump.id}
         </h3>
         <hr className="border-t border-gray-300 mb-4" />
-        <div className="h-16 mb-4"> {/* Reduced height from h-24 to h-16 */}
+        <div className="h-16 mb-4">
           {pump.currentVehicle ? (
-            <Vehicle vehicle={pump.currentVehicle} />
+            <Vehicle vehicle={pump.currentVehicle} bgcolor={getVehicleBackgroundColor()}/>
           ) : (
             <div className="h-full border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
               <span className="text-gray-400">No vehicle</span>
@@ -50,7 +61,13 @@ const Pump: React.FC<Props> = ({ pump, onSelectGasoline, socket }) => {
         <div className="gasoline-selection mt-4">
           {pump.status === 'fueling' && pump.selectedGasoline ? (
             <div className="flex justify-center">
-              <div className="w-24 h-24 relative overflow-hidden rounded-md">
+              <div 
+                className={`w-24 h-24 relative overflow-hidden rounded-md ${
+                  isCompatibleFuel(pump.currentVehicle?.type || '', pump.selectedGasoline)
+                    ? 'bg-green-200'
+                    : 'bg-red-200'
+                }`}
+              >
                 <img 
                   src={gasolineTypes.find(type => type.name === pump.selectedGasoline)?.icon} 
                   alt={pump.selectedGasoline} 

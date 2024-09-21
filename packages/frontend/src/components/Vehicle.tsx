@@ -3,11 +3,15 @@ import { Vehicle as VehicleType } from '../types';
 
 interface Props {
   vehicle: VehicleType;
+  bgcolor?: string;
 }
 
-const Vehicle: React.FC<Props> = ({ vehicle }) => {
+const Vehicle: React.FC<Props> = ({ vehicle, bgcolor }) => {
+  const backgroundColorClass = bgcolor || 'bg-gray-100';
+
   return (
-    <div className="vehicle bg-gray-100 rounded-lg p-2 mb-2">
+    <div className={`vehicle ${backgroundColorClass} rounded-lg p-2 mb-2`}>
+
       <p className="text-sm text-gray-700">Type: {vehicle.type}</p>
       <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-1">
         <div 
@@ -22,4 +26,4 @@ const Vehicle: React.FC<Props> = ({ vehicle }) => {
   );
 };
 
-export default Vehicle;
+export default Vehicle; 
