@@ -1,9 +1,10 @@
 export interface Vehicle {
   id: string;
-  type: string;
+  type: 'Car' | 'Truck';
   currentFuel: number;
   tankCapacity: number;
   arrivalTime: number;
+  fuelType: 'Gas' | 'Diesel';
 }
 
 export interface Pump {

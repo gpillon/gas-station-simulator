@@ -3,6 +3,7 @@ export interface Vehicle {
     type: string;
     currentFuel: number;
     tankCapacity: number;
+    fuelType: "Gas" | "Diesel";
   }
 
   export interface Pump {

@@ -11,6 +11,7 @@ interface RefuelingCompletePayload {
 }
 
 interface PumpPanelProps {
+  gasStationState: SimulationState;
   pumpId: number;
   socket: Socket | null;
   onClose: () => void;
@@ -20,6 +21,7 @@ interface PumpPanelProps {
 }
 
 const PumpPanel: React.FC<PumpPanelProps> = ({
+  gasStationState,
   pumpId,
   socket,
   onClose,
@@ -59,7 +61,8 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
         }
       });
 
-      socket.on('stateUpdate', (state: SimulationState) => {
+      socket.on('stateUpdate', () => {
+        const state: SimulationState = gasStationState;
         const pump = state.pumps.find(p => p.id === pumpId);
         if (pump && pump.selectedGasoline && pump.currentVehicle) {
           const currentFuelPrice = state.fuelPrices[pump.selectedGasoline.replace('-', '').toLowerCase() as keyof typeof state.fuelPrices];
@@ -79,7 +82,7 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
         socket.off('refuelingUpdate');
       }
     };
-  }, [socket, onClose, pumpId]);
+  }, [socket, onClose, pumpId, gasStationState]);
 
 
   const handlePaymentSelect = (payment: string) => {
@@ -145,7 +148,7 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
                 <img 
                   src={gasolineTypes.find(type => type.name === state.fuelType)?.icon} 
                   alt={state.fuelType || 'Refueling'} 
-                  className="w-32 h-32 object-contain"
+                  className="w-64 h-64 object-contain"
                 />
               </div>
             ) : !state.paymentMethod ? (
@@ -167,19 +170,25 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
               <div className="h-full flex flex-col justify-between">
                 <h4 className="text-lg mb-2 md:hidden">Select Fuel Type:</h4>
                 <div className="grid grid-cols-2 gap-8 justify-items-center content-between h-full py-8">
-                  {gasolineTypes.map((fuel) => (
-                    <button
-                      key={fuel.name}
-                      onClick={() => handleFuelSelect(fuel.name)}
-                      className="relative w-32 h-32 overflow-hidden rounded-lg hover:shadow-lg transition-shadow duration-300"
-                    >
-                      <img
-                        src={fuel.icon}
-                        alt={fuel.name}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
+                  {gasolineTypes.map((fuel) => {
+                    const fuelPrice = gasStationState.fuelPrices[fuel.name.replace('-', '').toLowerCase() as keyof typeof gasStationState.fuelPrices];
+                    return (
+                      <button
+                        key={fuel.name}
+                        onClick={() => handleFuelSelect(fuel.name)}
+                        className="relative w-32 h-32 overflow-hidden rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-110"
+                      >
+                        <img
+                          src={fuel.icon}
+                          alt={fuel.name}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 transform hover:scale-110"
+                        />
+                        <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 py-2">
+                          <span className="text-white font-bold text-lg block text-center">{fuelPrice.toFixed(2)} €/L</span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ) : (

@@ -1,19 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { SimulationState, Vehicle, Pump } from './types';
 import { Subject } from 'rxjs';
+import { UpdatePricesDto } from './dto/update-rpices.dto';
 
 @Injectable()
 export class GasStationService {
   private state: SimulationState;
-  private previousState: SimulationState;
   private totalWaitTime: number = 0;
   private simulationInterval: NodeJS.Timeout | null = null;
-  public stateUpdates = new Subject<SimulationState>();
+  public stateUpdates = new Subject<Partial<SimulationState>>();
   public refuelingComplete = new Subject<{ pumpId: number; income: number }>();
-  private isSimulationRunning: boolean = false;
+  public isSimulationRunning: boolean = false;
+  private previousState: SimulationState;
 
   constructor() {
     this.resetSimulation();
+  }
+
+  getFuelPrices(): SimulationState['fuelPrices'] {
+    return this.state.fuelPrices;
+  }
+
+  updateFuelPrices(prices: UpdatePricesDto): SimulationState['fuelPrices'] {
+    this.state.fuelPrices = { ...this.state.fuelPrices, ...prices };
+    return this.state.fuelPrices;
   }
 
   selectGasoline(pumpId: number, gasolineType: string) {
@@ -35,6 +45,8 @@ export class GasStationService {
         this.updateSimulation();
         this.emitStateUpdate();
       }, 100);
+      this.isSimulationRunning = true;
+      this.state.isSimulationRunning = this.isSimulationRunning;
       this.emitStateUpdate(); // Emit immediately after starting
     }
   }
@@ -44,11 +56,13 @@ export class GasStationService {
       clearInterval(this.simulationInterval);
       this.simulationInterval = null;
       this.isSimulationRunning = false;
+      this.state.isSimulationRunning = this.isSimulationRunning;
       this.emitStateUpdate(); // Emit immediately after stopping
     }
   }
 
   resetSimulation() {
+    setImmediate(() => this.stopSimulation);
     this.state = {
       pumps: [
         { id: 1, status: 'idle', currentVehicle: null, selectedGasoline: null },
@@ -61,7 +75,7 @@ export class GasStationService {
       trucksServed: 0,
       averageWaitTime: 0,
       totalRevenue: 0,
-      isSimulationRunning: false,
+      isSimulationRunning: this.isSimulationRunning,
       fuelDispensed: {
         regular: 0,
         midgrade: 0,
@@ -81,16 +95,15 @@ export class GasStationService {
         diesel: 0,
       },
       fuelPrices: {
-        regular: 1.74,
-        midgrade: 1.85,
-        premium: 2.01,
-        diesel: 1.68,
+        regular: 1.744,
+        midgrade: 1.853,
+        premium: 2.019,
+        diesel: 1.687,
       },
-    };
-    this.totalWaitTime = 0;
-
+    } as const;
+    this.previousState = { ...this.state };
     this.stateUpdates.next(this.state);
-    this.emitStateUpdate();
+    this.emitStateUpdate(true);
   }
 
   getState(): SimulationState {
@@ -171,17 +184,57 @@ export class GasStationService {
 
     this.handleRefillTank();
 
+    const { changed, diffs } = this.getStateDiff();
     // Check if state has changed
-    if (this.hasStateChanged()) {
-      this.stateUpdates.next({
-        ...this.state,
-        isSimulationRunning: this.isSimulationRunning,
-      });
+    if (changed) {
+      // console.log(`State has changed, ${i++}`, JSON.stringify(diffs));
+      this.stateUpdates.next(diffs);
     }
   }
 
   private hasStateChanged(): boolean {
     return JSON.stringify(this.state) !== JSON.stringify(this.previousState);
+  }
+
+  private getStateDiff(): {
+    changed: boolean;
+    diffs: Partial<SimulationState>;
+  } {
+    const diffs: Partial<SimulationState> = {};
+    let changed = false;
+
+    for (const key in this.state) {
+      if (Array.isArray(this.state[key])) {
+        if (
+          JSON.stringify(this.state[key]) !==
+          JSON.stringify(this.previousState[key])
+        ) {
+          diffs[key] = this.state[key];
+          changed = true;
+        }
+      } else if (
+        typeof this.state[key] === 'object' &&
+        this.state[key] !== null
+      ) {
+        const objectDiffs = {};
+        let objectChanged = false;
+        for (const subKey in this.state[key]) {
+          if (this.state[key][subKey] !== this.previousState[key][subKey]) {
+            objectDiffs[subKey] = this.state[key][subKey];
+            objectChanged = true;
+          }
+        }
+        if (objectChanged) {
+          diffs[key] = objectDiffs;
+          changed = true;
+        }
+      } else if (this.state[key] !== this.previousState[key]) {
+        diffs[key] = this.state[key];
+        changed = true;
+      }
+    }
+
+    return { changed, diffs };
   }
 
   private addVehicleToQueue() {
@@ -195,6 +248,12 @@ export class GasStationService {
           ? Math.floor(Math.random() * 40) + 15
           : Math.floor(Math.random() * 80) + 20,
       arrivalTime: Date.now(), // Add this line
+      fuelType:
+        vehicleType === 'Car'
+          ? Math.random() < 0.2
+            ? 'Diesel'
+            : 'Gas'
+          : 'Diesel',
     };
 
     this.state.queue.push(newVehicle);
@@ -272,10 +331,17 @@ export class GasStationService {
     }
   }
 
-  private emitStateUpdate() {
-    this.stateUpdates.next({
-      ...this.state,
-      isSimulationRunning: this.isSimulationRunning,
-    });
+  public emitStateUpdate(force: boolean = false) {
+    // console.log('Emitting state update', this.state);
+    const { changed, diffs } = this.getStateDiff();
+    if (force) {
+      this.stateUpdates.next(this.state);
+    } else if (changed) {
+      this.stateUpdates.next(diffs);
+    }
+    // this.stateUpdates.next({
+    //   ...this.state,
+    //   isSimulationRunning: this.isSimulationRunning,
+    // });
   }
 }

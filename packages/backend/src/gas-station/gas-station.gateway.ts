@@ -10,7 +10,7 @@ import { GasStationService } from './gas-station.service';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3001',
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -31,7 +31,10 @@ export class GasStationGateway
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
-    client.emit('stateUpdate', this.gasStationService.getState());
+    client.emit('stateUpdate', {
+      ...this.gasStationService.getState(),
+      isSimulationRunning: this.gasStationService.isSimulationRunning,
+    });
   }
 
   handleDisconnect(client: Socket) {

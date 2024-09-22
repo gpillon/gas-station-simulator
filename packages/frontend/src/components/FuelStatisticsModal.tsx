@@ -1,16 +1,14 @@
 import React from 'react';
 import { SimulationState } from '../types';
 import { StatItem, RefillLink } from './StatisticsPanel';
-import useWebSocket from '../hooks/useWebSocket';
 
 interface Props {
   state: SimulationState;
   onClose: () => void;
+  refillFuel: (amount: number, gasolineType: string) => void;
 }
 
-const FuelStatisticsModal: React.FC<Props> = ({ state, onClose }) => {
-  const { refillFuel } = useWebSocket();
-
+const FuelStatisticsModal: React.FC<Props> = ({ state, onClose, refillFuel }) => {
   const handleRefill = (fuelType: string) => {
     refillFuel(1000, fuelType);
   };

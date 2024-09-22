@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { SimulationState } from '../types';
 import refuelingCompleteSound from '../assets/sounds/refueling-complete.mp3';
-
-const SOCKET_SERVER_HOST = process.env.REACT_APP_SOCKET_HOST || 'localhost:3000';
+import { getBackendHost } from '../utils/getBackendUrls';
 
 const useWebSocket = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -51,9 +50,7 @@ const useWebSocket = () => {
 
 
   useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const socket_url = process.env.PROD_BUILD === "true" ? `${protocol}://${SOCKET_SERVER_HOST}` : `${protocol}://localhost:3000`;
-    const newSocket = io(socket_url, {
+    const newSocket = io(getBackendHost().socket_url, {
       withCredentials: true,
       transports: ['websocket', 'polling'],
     });
@@ -67,13 +64,30 @@ const useWebSocket = () => {
       console.error('WebSocket connection error:', error);
     });
 
-    newSocket.on('stateUpdate', (newState: SimulationState) => {
-      // console.log('Received state update:', newState);
-      setState(prevState => ({
-        ...prevState,
-        ...newState,
-        isSimulationRunning: newState.isSimulationRunning
-      }));
+    newSocket.on('stateUpdate', (newState: Partial<SimulationState>) => {
+
+      setState(prevState => {
+        const deepMerge = <T extends Record<string, any>>(target: T, source: Partial<T>): T => {
+          const result = { ...target };
+          for (const key in source) {
+            if (source.hasOwnProperty(key)) {
+              const targetValue = target[key];
+              const sourceValue = source[key];
+              if (typeof sourceValue === 'object' && sourceValue !== null && !Array.isArray(sourceValue)) {
+                result[key] = deepMerge(
+                  targetValue as  T[Extract<keyof T, string>],
+                  sourceValue as  T[Extract<keyof T, string>]
+                );
+              } else if (sourceValue !== undefined) {
+                result[key] = sourceValue as T[Extract<keyof T, string>];
+              }
+            }
+          }
+          return result;
+        };
+
+        return deepMerge(prevState, newState);
+      });
     });
 
     newSocket.on('refuelingComplete', ({income}: {income: number}) => {

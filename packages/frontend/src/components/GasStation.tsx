@@ -4,14 +4,16 @@ import Queue from './Queue';
 import { SimulationState } from '../types';
 import { Socket } from 'socket.io-client';
 import FuelStatisticsModal from './FuelStatisticsModal';
+import FuelPrices from './FuelPrices';
 
 interface Props {
   state: SimulationState;
   onSelectGasoline: (pumpId: number, gasolineType: string) => void;
   socket: Socket | null;
+  refillFuel: (amount: number, gasolineType: string) => void;
 }
 
-const GasStation: React.FC<Props> = ({ state, onSelectGasoline, socket }) => {
+const GasStation: React.FC<Props> = ({ state, onSelectGasoline, socket, refillFuel }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fuelStatus, setFuelStatus] = useState<'normal' | 'low' | 'empty'>('normal');
 
@@ -66,6 +68,7 @@ const GasStation: React.FC<Props> = ({ state, onSelectGasoline, socket }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {state.pumps.map(pump => (
           <Pump 
+            state={state}
             key={pump.id} 
             pump={pump} 
             onSelectGasoline={onSelectGasoline}
@@ -75,10 +78,12 @@ const GasStation: React.FC<Props> = ({ state, onSelectGasoline, socket }) => {
         ))}
       </div>
       <Queue vehicles={state.queue} />
+      <FuelPrices prices={state.fuelPrices} />  {/* Add this line */}
       {isModalOpen && (
         <FuelStatisticsModal 
           state={state} 
           onClose={() => setIsModalOpen(false)} 
+          refillFuel={refillFuel}
         />
       )}
     </div>

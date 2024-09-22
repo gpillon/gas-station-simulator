@@ -8,15 +8,20 @@ import regularIcon from '../assets/images/regular.png';
 import midGradeIcon from '../assets/images/midgrade.png';
 import premiumIcon from '../assets/images/premium.png';
 import dieselIcon from '../assets/images/diesel.png';
+import { SimulationState } from '../types';
+import { Socket } from 'socket.io-client';
+import { getAvailableFuelTypes } from '../utils/availableFuelTypes';
 
 interface Props {
+  state: SimulationState;
   pump: PumpType;
   onSelectGasoline: (pumpId: number, gasolineType: string) => void;
-  socket: any; // Replace 'any' with the correct socket type
+  socket: Socket | null;
+
   fuelCapacity: { [key: string]: number }; // Add this line
 }
 
-const Pump: React.FC<Props> = ({ pump, onSelectGasoline, socket, fuelCapacity }) => {
+const Pump: React.FC<Props> = ({ state, pump, onSelectGasoline, socket, fuelCapacity }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const gasolineTypes = [
@@ -96,12 +101,12 @@ const Pump: React.FC<Props> = ({ pump, onSelectGasoline, socket, fuelCapacity })
                       key={type.name}
                       onClick={() => pump.currentVehicle && !isFuelEmpty && onSelectGasoline(pump.id, type.name)}
                       className={`flex flex-col items-center ${
-                        !pump.currentVehicle || isFuelEmpty ? 'opacity-50 cursor-not-allowed' : ''
+                        !pump.currentVehicle || isFuelEmpty || !getAvailableFuelTypes(pump.currentVehicle).includes(type.name) ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
-                      disabled={!pump.currentVehicle || isFuelEmpty}
+                      disabled={(!pump.currentVehicle || isFuelEmpty || !getAvailableFuelTypes(pump.currentVehicle).includes(type.name))}
                     >
                       <div className={`relative aspect-square w-full overflow-hidden rounded-lg shadow-md transition duration-300 ease-in-out ${
-                        !pump.currentVehicle || isFuelEmpty ? 'grayscale' : 'hover:shadow-lg transform hover:scale-105'
+                        !pump.currentVehicle || isFuelEmpty || !getAvailableFuelTypes(pump.currentVehicle).includes(type.name) ? 'grayscale' : 'hover:shadow-lg transform hover:scale-105'
                       }`}>
                         <img 
                           src={type.icon} 
@@ -123,6 +128,7 @@ const Pump: React.FC<Props> = ({ pump, onSelectGasoline, socket, fuelCapacity })
         </div>
         {isPanelOpen && (
         <PumpPanel 
+          gasStationState={state}
           pumpId={pump.id} 
           socket={socket} 
           onClose={() => setIsPanelOpen(false)}
