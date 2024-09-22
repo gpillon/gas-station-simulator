@@ -21,10 +21,10 @@ const Controls: React.FC<Props> = ({ sendCommand, isSimulationRunning }) => {
   return (
     <div className="controls mt-8">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">Controls</h2>
-      <div className="flex space-x-4">
+      <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
         <button
           onClick={handleStartClick}
-          className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded ${
+          className={`w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded ${
             isSimulationRunning ? 'opacity-50 cursor-not-allowed z-0' : 'z-10'
           }`}
           disabled={isSimulationRunning}
@@ -33,7 +33,7 @@ const Controls: React.FC<Props> = ({ sendCommand, isSimulationRunning }) => {
         </button>
         <button
           onClick={handleStopClick}
-          className={`bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded ${
+          className={`w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded ${
             !isSimulationRunning ? 'opacity-50 cursor-not-allowed z-0' : 'z-10'
           }`}
           disabled={!isSimulationRunning}
@@ -42,7 +42,7 @@ const Controls: React.FC<Props> = ({ sendCommand, isSimulationRunning }) => {
         </button>
         <button
           onClick={() => sendCommand('RESET')}
-          className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded z-10"
+          className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded z-10"
         >
           Reset Simulation
         </button>

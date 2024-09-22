@@ -11,8 +11,16 @@ export interface Pump {
   id: number;
   status: 'idle' | 'busy' | 'fueling';
   currentVehicle: Vehicle | null;
-  selectedGasoline: string | null;
+  selectedGasoline: ['regular', 'midgrade', 'premium', 'diesel'][number];
 }
+
+export const GasolineType = [
+  'regular',
+  'midgrade',
+  'premium',
+  'diesel',
+] as const;
+export type GasolineTypeT = (typeof GasolineType)[number];
 
 export interface SimulationState {
   pumps: Pump[];

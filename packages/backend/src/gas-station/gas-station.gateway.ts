@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GasStationService } from './gas-station.service';
+import { GasolineTypeT } from './types';
 
 @WebSocketGateway({
   cors: {
@@ -44,7 +45,7 @@ export class GasStationGateway
   @SubscribeMessage('selectGasoline')
   handleSelectGasoline(
     client: Socket,
-    payload: { pumpId: number; gasolineType: string },
+    payload: { pumpId: number; gasolineType: GasolineTypeT },
   ) {
     console.log(
       `Selecting gasoline: Pump ${payload.pumpId}, Type: ${payload.gasolineType}`,
@@ -71,7 +72,7 @@ export class GasStationGateway
   @SubscribeMessage('startRefueling')
   handleStartRefueling(
     _client: Socket,
-    payload: { pumpId: string; fuelType: string; paymentMethod: string },
+    payload: { pumpId: string; fuelType: GasolineTypeT; paymentMethod: string },
   ) {
     console.log('Starting refueling:', payload);
     this.gasStationService.startRefueling(

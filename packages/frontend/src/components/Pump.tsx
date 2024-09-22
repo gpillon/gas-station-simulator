@@ -17,8 +17,7 @@ interface Props {
   pump: PumpType;
   onSelectGasoline: (pumpId: number, gasolineType: string) => void;
   socket: Socket | null;
-
-  fuelCapacity: { [key: string]: number }; // Add this line
+  fuelCapacity: { [key: string]: number };
 }
 
 const Pump: React.FC<Props> = ({ state, pump, onSelectGasoline, socket, fuelCapacity }) => {
@@ -32,7 +31,6 @@ const Pump: React.FC<Props> = ({ state, pump, onSelectGasoline, socket, fuelCapa
   ];
 
   const isCompatibleFuel = (vehicleType: string, fuelType: string) => {
-    // return (vehicleType === 'Car' && fuelType !== 'Diesel') || (vehicleType === 'Truck' && fuelType === 'Diesel');
     return (vehicleType === 'Car') || (vehicleType === 'Truck' && fuelType === 'Diesel');
   };
 
@@ -79,11 +77,7 @@ const Pump: React.FC<Props> = ({ state, pump, onSelectGasoline, socket, fuelCapa
           {pump.status === 'fueling' && pump.selectedGasoline ? (
             <div className="flex justify-center">
               <div 
-                className={`w-24 h-24 relative overflow-hidden rounded-md ${
-                  isCompatibleFuel(pump.currentVehicle?.type || '', pump.selectedGasoline)
-                    ? 'bg-green-200'
-                    : 'bg-red-200'
-                }`}
+                className={`w-full aspect-square max-w-[500px] relative overflow-hidden rounded-md `}
               >
                 <img 
                   src={gasolineTypes.find(type => type.name === pump.selectedGasoline)?.icon} 
@@ -92,41 +86,41 @@ const Pump: React.FC<Props> = ({ state, pump, onSelectGasoline, socket, fuelCapa
                 />
               </div>
             </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                {gasolineTypes.map((type) => {
-                  const isFuelEmpty = fuelCapacity[type.capacityKey] <= 0;
-                  return (
-                    <button
-                      key={type.name}
-                      onClick={() => pump.currentVehicle && !isFuelEmpty && onSelectGasoline(pump.id, type.name)}
-                      className={`flex flex-col items-center ${
-                        !pump.currentVehicle || isFuelEmpty || !getAvailableFuelTypes(pump.currentVehicle).includes(type.name) ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                      disabled={(!pump.currentVehicle || isFuelEmpty || !getAvailableFuelTypes(pump.currentVehicle).includes(type.name))}
-                    >
-                      <div className={`relative aspect-square w-full overflow-hidden rounded-lg shadow-md transition duration-300 ease-in-out ${
-                        !pump.currentVehicle || isFuelEmpty || !getAvailableFuelTypes(pump.currentVehicle).includes(type.name) ? 'grayscale' : 'hover:shadow-lg transform hover:scale-105'
-                      }`}>
-                        <img 
-                          src={type.icon} 
-                          alt={type.name} 
-                          className="w-full h-full object-cover"
-                        />
-                        {isFuelEmpty && (
-                          <div className="absolute inset-0 bg-red-500 bg-opacity-50 flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">N/A</span>
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {gasolineTypes.map((type) => {
+                const isFuelEmpty = fuelCapacity[type.capacityKey] <= 0;
+                return (
+                  <button
+                    key={type.name}
+                    onClick={() => pump.currentVehicle && !isFuelEmpty && onSelectGasoline(pump.id, type.name)}
+                    className={`flex flex-col items-center w-full ${
+                      !pump.currentVehicle || isFuelEmpty || !getAvailableFuelTypes(pump.currentVehicle).includes(type.name) ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    disabled={(!pump.currentVehicle || isFuelEmpty || !getAvailableFuelTypes(pump.currentVehicle).includes(type.name))}
+                  >
+                    <div className={`relative aspect-square w-full overflow-hidden rounded-lg shadow-md transition duration-300 ease-in-out ${
+                      !pump.currentVehicle || isFuelEmpty || !getAvailableFuelTypes(pump.currentVehicle).includes(type.name) ? 'grayscale' : 'hover:shadow-lg'
+                    }`}>
+                      <img 
+                        src={type.icon} 
+                        alt={type.name} 
+                        className="w-full h-full object-cover"
+                      />
+                      {isFuelEmpty && (
+                        <div className="absolute inset-0 bg-red-500 bg-opacity-50 flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">N/A</span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
-        {isPanelOpen && (
+      </div>
+      {isPanelOpen && (
         <PumpPanel 
           gasStationState={state}
           pumpId={pump.id} 

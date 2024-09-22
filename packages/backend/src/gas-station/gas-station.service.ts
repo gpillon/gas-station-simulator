@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SimulationState, Vehicle, Pump } from './types';
+import { SimulationState, Vehicle, Pump, GasolineTypeT } from './types';
 import { Subject } from 'rxjs';
 import { UpdatePricesDto } from './dto/update-rpices.dto';
 
@@ -26,7 +26,7 @@ export class GasStationService {
     return this.state.fuelPrices;
   }
 
-  selectGasoline(pumpId: number, gasolineType: string) {
+  selectGasoline(pumpId: number, gasolineType: GasolineTypeT) {
     const pump = this.state.pumps.find((p) => p.id === pumpId);
     if (pump && pump.status === 'busy' && !pump.selectedGasoline) {
       pump.selectedGasoline = gasolineType;
@@ -129,6 +129,7 @@ export class GasStationService {
             .replace('-', '') as keyof typeof this.state.fuelDispensed &
             keyof typeof this.state.fuelCapacity;
 
+          // interrup if no fuel in Gas Station tank
           if (this.state.fuelCapacity[fuelType] <= 0) {
             this.state.fuelCapacity[fuelType] = 0;
             this.finishRefueling(pump, false); // Don't emit update for each pump
@@ -277,7 +278,7 @@ export class GasStationService {
 
   startRefueling(
     pumpId: number | string,
-    fuelType: string,
+    fuelType: GasolineTypeT,
     // paymentMethod: string,
   ) {
     if (typeof pumpId === 'string') {

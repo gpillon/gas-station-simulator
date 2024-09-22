@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SimulationState } from '../types';
+import { GasolineType, GasolineTypeT, SimulationState } from '../types';
 import { ReadPricesDto } from './read-prices.dto';
 import { Pump as PumpT } from '../types';
 import { ReadVehicleDto } from './read-vehicle.dts';
@@ -42,10 +42,10 @@ class Pump implements PumpT {
   id: number;
   @ApiProperty({ example: 'idle' })
   status: 'idle' | 'busy' | 'fueling';
-  @ApiProperty({ example: null })
-  currentVehicle: any | null;
-  @ApiProperty({ example: null })
-  selectedGasoline: string | null;
+  @ApiProperty({ type: ReadVehicleDto })
+  currentVehicle: ReadVehicleDto | null;
+  @ApiProperty({ enum: GasolineType })
+  selectedGasoline: GasolineTypeT;
 }
 
 export class ReadStateDto implements SimulationState {
