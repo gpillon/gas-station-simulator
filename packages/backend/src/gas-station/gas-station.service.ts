@@ -9,6 +9,7 @@ export class GasStationService {
   private totalWaitTime: number = 0;
   private simulationInterval: NodeJS.Timeout | null = null;
   public stateUpdates = new Subject<SimulationState>();
+  public refuelingComplete = new Subject<{ pumpId: number; income: number }>();
   private isSimulationRunning: boolean = false;
 
   constructor() {
@@ -67,6 +68,24 @@ export class GasStationService {
         premium: 0,
         diesel: 0,
       },
+      fuelCapacity: {
+        regular: 500,
+        midgrade: 500,
+        premium: 500,
+        diesel: 500,
+      },
+      refillingFuels: {
+        regular: 0,
+        midgrade: 0,
+        premium: 0,
+        diesel: 0,
+      },
+      fuelPrices: {
+        regular: 1.74,
+        midgrade: 1.85,
+        premium: 2.01,
+        diesel: 1.68,
+      },
     };
     this.totalWaitTime = 0;
 
@@ -89,7 +108,23 @@ export class GasStationService {
     // Process vehicles at pumps
     this.state.pumps.forEach((pump) => {
       if (pump.status === 'fueling' && pump.currentVehicle) {
-        pump.currentVehicle.currentFuel += 1;
+        const fuelAmount = 1;
+
+        if (pump.selectedGasoline) {
+          const fuelType = pump.selectedGasoline
+            .toLowerCase()
+            .replace('-', '') as keyof typeof this.state.fuelDispensed &
+            keyof typeof this.state.fuelCapacity;
+
+          if (this.state.fuelCapacity[fuelType] <= 0) {
+            this.state.fuelCapacity[fuelType] = 0;
+            this.finishRefueling(pump, false); // Don't emit update for each pump
+            return;
+          }
+          pump.currentVehicle.currentFuel += fuelAmount;
+          this.state.fuelCapacity[fuelType] -= fuelAmount;
+          this.state.fuelDispensed[fuelType] += fuelAmount;
+        }
         if (
           pump.currentVehicle.currentFuel >= pump.currentVehicle.tankCapacity
         ) {
@@ -120,13 +155,21 @@ export class GasStationService {
       (pump) => pump.status === 'idle',
     );
     while (emptyPumps.length > 0 && this.state.queue.length > 0) {
-      const pump = emptyPumps.pop();
+      // Select a random empty pump
+      const randomIndex = Math.floor(Math.random() * emptyPumps.length);
+      const randomPump = emptyPumps[randomIndex];
+
       const vehicle = this.state.queue.shift();
-      if (pump && vehicle) {
-        pump.status = 'busy';
-        pump.currentVehicle = vehicle;
+      if (randomPump && vehicle) {
+        randomPump.status = 'busy';
+        randomPump.currentVehicle = vehicle;
+
+        // Remove the selected pump from the emptyPumps array
+        emptyPumps.splice(randomIndex, 1);
       }
     }
+
+    this.handleRefillTank();
 
     // Check if state has changed
     if (this.hasStateChanged()) {
@@ -157,6 +200,22 @@ export class GasStationService {
     this.state.queue.push(newVehicle);
   }
 
+  handleRefillTank() {
+    for (const fuelType in this.state.refillingFuels) {
+      if (this.state.refillingFuels[fuelType] > 0) {
+        const refillingAmountPerTick = 1;
+        this.state.refillingFuels[fuelType] -= refillingAmountPerTick;
+        this.state.fuelCapacity[fuelType] += refillingAmountPerTick;
+      }
+    }
+  }
+
+  refillFuel(amount: number, fuelType: string) {
+    console.log('Refilling fuel:', amount, fuelType);
+    this.state.refillingFuels[fuelType] += amount;
+    this.state.totalRevenue -= 0.8 * amount * this.state.fuelPrices[fuelType];
+  }
+
   startRefueling(
     pumpId: number | string,
     fuelType: string,
@@ -169,11 +228,6 @@ export class GasStationService {
     if (pump && pump.status === 'busy' && pump.currentVehicle) {
       pump.selectedGasoline = fuelType;
       pump.status = 'fueling';
-
-      // Simulate refueling process
-      setTimeout(() => {
-        this.finishRefueling(pump);
-      }, 5000); // 5 seconds for demonstration, adjust as needed
 
       this.stateUpdates.next({
         ...this.state,
@@ -191,31 +245,21 @@ export class GasStationService {
         this.state.trucksServed++;
       }
 
-      const fuelAmount = pump.currentVehicle.tankCapacity;
-      this.state.totalRevenue += fuelAmount * 1.74;
+      const income =
+        pump.currentVehicle.currentFuel *
+        this.state.fuelPrices[
+          pump.selectedGasoline.toLowerCase().replace('-', '')
+        ];
+      this.state.totalRevenue += income;
 
       // Update fuel dispensed
       console.log('Finishing refueling', pump.selectedGasoline);
-      if (pump.selectedGasoline) {
-        const fuelType = pump.selectedGasoline
-          .toLowerCase()
-          .replace('-', '') as keyof typeof this.state.fuelDispensed;
-        this.state.fuelDispensed[fuelType] += fuelAmount;
-        console.log(
-          'Fuel dispensed',
-          fuelType,
-          this.state.fuelDispensed,
-          pump.selectedGasoline.toLowerCase(),
-          pump.selectedGasoline.toLowerCase().replace('-', ''),
-          fuelAmount,
-          this.state.totalRevenue,
-        );
-      }
 
       const waitTime = (Date.now() - pump.currentVehicle.arrivalTime) / 60000;
       this.totalWaitTime += waitTime;
       this.state.averageWaitTime =
-        this.totalWaitTime / this.state.vehiclesServed;
+        0.7 * this.state.averageWaitTime + 0.3 * waitTime;
+      // this.state.averageWaitTime = this.totalWaitTime / this.state.vehiclesServed;
 
       pump.status = 'idle';
       pump.currentVehicle = null;
@@ -224,6 +268,7 @@ export class GasStationService {
       if (emitUpdate && this.hasStateChanged()) {
         this.stateUpdates.next(this.state);
       }
+      this.refuelingComplete.next({ pumpId: pump.id, income: income });
     }
   }
 

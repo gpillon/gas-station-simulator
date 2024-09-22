@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { SimulationState } from '../types';
+import refuelingCompleteSound from '../assets/sounds/refueling-complete.mp3';
 
 const SOCKET_SERVER_HOST = process.env.REACT_APP_SOCKET_HOST || 'localhost:3000';
 
@@ -21,7 +22,33 @@ const useWebSocket = () => {
       premium: 0,
       diesel: 0,
     },
+    fuelCapacity: {
+      regular: 0,
+      midgrade: 0,
+      premium: 0,
+      diesel: 0,
+    },
+    refillingFuels: {
+      regular: 0,
+      midgrade: 0,
+      premium: 0,
+      diesel: 0,
+    },
+    fuelPrices: {
+      regular: 0,
+      midgrade: 0,
+      premium: 0,
+      diesel: 0,
+    },
   });
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio(refuelingCompleteSound);
+    audioRef.current.volume = 0.2;
+  }, []);
+
 
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
@@ -49,6 +76,13 @@ const useWebSocket = () => {
       }));
     });
 
+    newSocket.on('refuelingComplete', ({income}: {income: number}) => {
+      // console.log('Received state update:', newState);
+      if (audioRef.current && income > 0) {
+        audioRef.current.play().catch(error => console.error('Error playing sound:', error));
+      }
+    });
+
     return () => {
       newSocket.close();
     };
@@ -72,7 +106,14 @@ const useWebSocket = () => {
     }
   }, [socket]);
 
-  return { state, sendCommand, selectGasoline, socket };
+  const refillFuel = useCallback((amount: number, gasolineType: string) => {
+    if (socket) {
+      console.log(`Sending refill command: ${amount} ${gasolineType}`);
+      socket.emit('refillFuel', { amount, gasolineType });
+    }
+  }, [socket]);
+
+  return { state, sendCommand, selectGasoline, socket, refillFuel };
 };
 
 export default useWebSocket;

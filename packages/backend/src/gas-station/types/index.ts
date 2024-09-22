@@ -28,4 +28,22 @@ export interface SimulationState {
     premium: number;
     diesel: number;
   };
+  fuelCapacity: {
+    regular: number;
+    midgrade: number;
+    premium: number;
+    diesel: number;
+  };
+  refillingFuels: {
+    regular: number;
+    midgrade: number;
+    premium: number;
+    diesel: number;
+  };
+  fuelPrices: {
+    regular: number;
+    midgrade: number;
+    premium: number;
+    diesel: number;
+  };
 }

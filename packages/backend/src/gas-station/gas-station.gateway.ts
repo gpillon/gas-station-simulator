@@ -24,6 +24,9 @@ export class GasStationGateway
     this.gasStationService.stateUpdates.subscribe((state) => {
       this.server.emit('stateUpdate', state);
     });
+    this.gasStationService.refuelingComplete.subscribe((pumpId) => {
+      this.server.emit('refuelingComplete', pumpId);
+    });
   }
 
   handleConnection(client: Socket) {
@@ -64,7 +67,7 @@ export class GasStationGateway
 
   @SubscribeMessage('startRefueling')
   handleStartRefueling(
-    client: Socket,
+    _client: Socket,
     payload: { pumpId: string; fuelType: string; paymentMethod: string },
   ) {
     console.log('Starting refueling:', payload);
@@ -73,9 +76,23 @@ export class GasStationGateway
       payload.fuelType,
     );
     // Simulate refueling completion
-    setTimeout(() => {
-      console.log('Refueling complete');
-      client.emit('refuelingComplete');
-    }, 5000); // 5 seconds for demonstration, adjust as needed
+    // setTimeout(() => {
+    //   console.log('Refueling complete');
+    //   client.emit('refuelingComplete', payload.pumpId);
+    // }, 5000); // 5 seconds for demonstration, adjust as needed
+  }
+
+  @SubscribeMessage('refillFuel')
+  handleRefillFuel(
+    _client: Socket,
+    payload: { amount: number; gasolineType: string },
+  ) {
+    console.log('Refilling fuel:', payload);
+    this.gasStationService.refillFuel(payload.amount, payload.gasolineType);
+    // Simulate refueling completion
+    // setTimeout(() => {
+    //   console.log('Refueling complete');
+    //   client.emit('refuelingComplete', payload.pumpId);
+    // }, 5000); // 5 seconds for demonstration, adjust as needed
   }
 }

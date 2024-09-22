@@ -13,20 +13,22 @@ interface Props {
   pump: PumpType;
   onSelectGasoline: (pumpId: number, gasolineType: string) => void;
   socket: any; // Replace 'any' with the correct socket type
+  fuelCapacity: { [key: string]: number }; // Add this line
 }
 
-const Pump: React.FC<Props> = ({ pump, onSelectGasoline, socket }) => {
+const Pump: React.FC<Props> = ({ pump, onSelectGasoline, socket, fuelCapacity }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const gasolineTypes = [
-    { name: 'Regular', icon: regularIcon },
-    { name: 'MidGrade', icon: midGradeIcon },
-    { name: 'Premium', icon: premiumIcon },
-    { name: 'Diesel', icon: dieselIcon },
+    { name: 'Regular', icon: regularIcon, capacityKey: 'regular' },
+    { name: 'MidGrade', icon: midGradeIcon, capacityKey: 'midgrade' },
+    { name: 'Premium', icon: premiumIcon, capacityKey: 'premium' },
+    { name: 'Diesel', icon: dieselIcon, capacityKey: 'diesel' },
   ];
 
   const isCompatibleFuel = (vehicleType: string, fuelType: string) => {
-    return (vehicleType === 'Car' && fuelType !== 'Diesel') || (vehicleType === 'Truck' && fuelType === 'Diesel');
+    // return (vehicleType === 'Car' && fuelType !== 'Diesel') || (vehicleType === 'Truck' && fuelType === 'Diesel');
+    return (vehicleType === 'Car') || (vehicleType === 'Truck' && fuelType === 'Diesel');
   };
 
   const getVehicleBackgroundColor = () => {
@@ -36,12 +38,22 @@ const Pump: React.FC<Props> = ({ pump, onSelectGasoline, socket }) => {
     return '';
   };
 
+  const handleTitleClick = () => {
+    if (pump.currentVehicle) {
+      setIsPanelOpen(true);
+    }
+  };
+
   return (
     <>
       <div className="pump bg-white shadow-md rounded-lg p-4">
         <h3 
-          className="text-xl font-semibold text-center text-blue-600 mb-2 cursor-pointer hover:text-blue-800 transition-colors duration-300"
-          onClick={() => setIsPanelOpen(true)}
+          className={`text-xl font-semibold text-center mb-2 ${
+            pump.currentVehicle 
+              ? 'text-blue-600 cursor-pointer hover:text-blue-800 transition-colors duration-300'
+              : 'text-gray-400'
+          }`}
+          onClick={handleTitleClick}
         >
           Pump {pump.id}
         </h3>
@@ -75,29 +87,41 @@ const Pump: React.FC<Props> = ({ pump, onSelectGasoline, socket }) => {
                 />
               </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
-              {gasolineTypes.map((type) => (
-                <button
-                  key={type.name}
-                  onClick={() => pump.currentVehicle && onSelectGasoline(pump.id, type.name)}
-                  className={`flex flex-col items-center ${!pump.currentVehicle ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={!pump.currentVehicle}
-                >
-                  <div className="relative aspect-square w-full overflow-hidden rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
-                    <img 
-                      src={type.icon} 
-                      alt={type.name} 
-                      className={`w-full h-full object-cover ${!pump.currentVehicle ? 'grayscale' : ''}`}
-                    />
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {gasolineTypes.map((type) => {
+                  const isFuelEmpty = fuelCapacity[type.capacityKey] <= 0;
+                  return (
+                    <button
+                      key={type.name}
+                      onClick={() => pump.currentVehicle && !isFuelEmpty && onSelectGasoline(pump.id, type.name)}
+                      className={`flex flex-col items-center ${
+                        !pump.currentVehicle || isFuelEmpty ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                      disabled={!pump.currentVehicle || isFuelEmpty}
+                    >
+                      <div className={`relative aspect-square w-full overflow-hidden rounded-lg shadow-md transition duration-300 ease-in-out ${
+                        !pump.currentVehicle || isFuelEmpty ? 'grayscale' : 'hover:shadow-lg transform hover:scale-105'
+                      }`}>
+                        <img 
+                          src={type.icon} 
+                          alt={type.name} 
+                          className="w-full h-full object-cover"
+                        />
+                        {isFuelEmpty && (
+                          <div className="absolute inset-0 bg-red-500 bg-opacity-50 flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">N/A</span>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-      {isPanelOpen && (
+        {isPanelOpen && (
         <PumpPanel 
           pumpId={pump.id} 
           socket={socket} 
