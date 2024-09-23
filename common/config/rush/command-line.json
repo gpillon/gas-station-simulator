@@ -16,7 +16,7 @@
       "commandKind": "global",
       "summary": "Start both backend and frontend in development mode",
       "description": "This command starts both the backend and frontend services in development mode.",
-      "safeForSimultaneousRushProcesses": false,
+      "safeForSimultaneousRushProcesses": true,
       "shellCommand": "node common/scripts/start-dev.js"
     },
     {

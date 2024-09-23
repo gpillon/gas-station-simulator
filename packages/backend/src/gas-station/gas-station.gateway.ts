@@ -28,6 +28,9 @@ export class GasStationGateway
     this.gasStationService.refuelingComplete.subscribe((pumpId) => {
       this.server.emit('refuelingComplete', pumpId);
     });
+    this.gasStationService.paymentUpdates.subscribe((payment) => {
+      this.server.emit('paymentUpdate', payment);
+    });
   }
 
   handleConnection(client: Socket) {
@@ -93,20 +96,27 @@ export class GasStationGateway
   ) {
     console.log('Refilling fuel:', payload);
     this.gasStationService.refillFuel(payload.amount, payload.gasolineType);
-    // Simulate refueling completion
-    // setTimeout(() => {
-    //   console.log('Refueling complete');
-    //   client.emit('refuelingComplete', payload.pumpId);
-    // }, 5000); // 5 seconds for demonstration, adjust as needed
   }
 
   @SubscribeMessage('simulationSettings')
   handleSettingsChange(_client: Socket, payload: Partial<SimulationSettings>) {
     this.gasStationService.simulationSetings(payload);
-    // Simulate refueling completion
-    // setTimeout(() => {
-    //   console.log('Refueling complete');
-    //   client.emit('refuelingComplete', payload.pumpId);
-    // }, 5000); // 5 seconds for demonstration, adjust as needed
+  }
+
+  @SubscribeMessage('qrPaymentId')
+  handleProcessPayment(
+    _client: Socket,
+    payload: { pumpId: number; paymentId: string },
+  ) {
+    this.gasStationService.paymentsRequests.push({
+      pumpId: payload.pumpId,
+      paymentId: payload.paymentId,
+    });
+    setTimeout(() => {
+      this.gasStationService.paymentsRequests =
+        this.gasStationService.paymentsRequests.filter(
+          (request) => request.paymentId !== payload.paymentId,
+        );
+    }, 120000);
   }
 }

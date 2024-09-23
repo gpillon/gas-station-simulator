@@ -11,7 +11,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  
+
   const config = new DocumentBuilder()
     .setTitle('Gas Station Api')
     .setDescription('The Gas Station API description')
@@ -26,8 +26,6 @@ async function bootstrap() {
     credentials: true,
     allowedHeaders: 'Origin,X-Requested-With,Content-Type,Accept,Authorization',
   });
-
-
 
   await app.listen(3000);
 }

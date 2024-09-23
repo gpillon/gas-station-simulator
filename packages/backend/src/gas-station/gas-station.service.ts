@@ -8,6 +8,7 @@ import {
 } from './types';
 import { Subject } from 'rxjs';
 import { UpdatePricesDto } from './dto/update-rpices.dto';
+import { ProcessPaymentDto } from './dto/porcess-payment.dto';
 
 @Injectable()
 export class GasStationService {
@@ -15,12 +16,14 @@ export class GasStationService {
   private totalWaitTime: number = 0;
   private simulationInterval: NodeJS.Timeout | null = null;
   public stateUpdates = new Subject<Partial<SimulationState>>();
+  public paymentUpdates = new Subject<ProcessPaymentDto>();
   public refuelingComplete = new Subject<{ pumpId: number; income: number }>();
   public isSimulationRunning: boolean = false;
   private previousState: SimulationState;
   private crudeOilPrice: number = 1.496;
   private simulationCycle: number = 1;
   private tickPerSecond: number = 10;
+  public paymentsRequests: { pumpId: number; paymentId: string }[] = [];
   private gainOnEachFuelTypeRespectToCrudeOil = {
     regular: 1.1,
     midgrade: 1.2,
@@ -355,7 +358,7 @@ export class GasStationService {
   private addVehicleToQueue() {
     const vehicleType = Math.random() < 0.7 ? 'Car' : 'Truck';
     const newVehicle: Vehicle = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).substring(2, 11),
       type: vehicleType,
       currentFuel: 0,
       tankCapacity:
@@ -490,5 +493,22 @@ export class GasStationService {
 
   deletePump(id: number): void {
     this.state.pumps = this.state.pumps.filter((p) => p.id !== id);
+  }
+
+  processPayment(pumpId: number, paymentId: string): { ok: boolean } {
+    if (
+      this.paymentsRequests.some(
+        (request) => request.paymentId === paymentId,
+      ) &&
+      this.paymentsRequests.some((request) => request.pumpId === pumpId)
+    ) {
+      this.paymentUpdates.next({ pumpId, paymentId });
+      this.paymentsRequests = this.paymentsRequests.filter(
+        (request) =>
+          request.paymentId !== paymentId && request.pumpId !== pumpId,
+      );
+      return { ok: true };
+    }
+    return { ok: false };
   }
 }
