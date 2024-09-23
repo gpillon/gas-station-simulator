@@ -1,8 +1,10 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Put } from '@nestjs/common';
 import { GasStationService } from './gas-station.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { ReadStateDto } from './dto/read-state.dto';
+import { SimulationSettings } from './types';
+import { UpdateSimulationSettingsDto } from './dto/update-simulation-settings.dto';
 
 @Controller('gas-station-simulation')
 @ApiTags('Gas Station Simulation')
@@ -42,6 +44,19 @@ export class GasStationSimulationController {
   })
   stop(): ReadStateDto {
     this.gasStationService.stopSimulation();
+    return this.gasStationService.getState();
+  }
+
+  @Put('settings')
+  @ApiOperation({ summary: 'Set the gas station settings' })
+  @ApiBody({ type: UpdateSimulationSettingsDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Gas station settings set',
+    type: ReadStateDto,
+  })
+  setSettings(@Body() settings: Partial<SimulationSettings>): ReadStateDto {
+    this.gasStationService.simulationSetings(settings);
     return this.gasStationService.getState();
   }
 }

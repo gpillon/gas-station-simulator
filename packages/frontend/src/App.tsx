@@ -21,6 +21,7 @@ const App: React.FC = () => {
           />
           <Statistics state={state} />
           <Controls 
+            state={state}
           sendCommand={sendCommand}
           isSimulationRunning={state.isSimulationRunning}
         />

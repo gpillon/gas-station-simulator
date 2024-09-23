@@ -7,7 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GasStationService } from './gas-station.service';
-import { GasolineTypeT } from './types';
+import { GasolineTypeT, SimulationSettings } from './types';
 
 @WebSocketGateway({
   cors: {
@@ -93,6 +93,16 @@ export class GasStationGateway
   ) {
     console.log('Refilling fuel:', payload);
     this.gasStationService.refillFuel(payload.amount, payload.gasolineType);
+    // Simulate refueling completion
+    // setTimeout(() => {
+    //   console.log('Refueling complete');
+    //   client.emit('refuelingComplete', payload.pumpId);
+    // }, 5000); // 5 seconds for demonstration, adjust as needed
+  }
+
+  @SubscribeMessage('simulationSettings')
+  handleSettingsChange(_client: Socket, payload: Partial<SimulationSettings>) {
+    this.gasStationService.simulationSetings(payload);
     // Simulate refueling completion
     // setTimeout(() => {
     //   console.log('Refueling complete');

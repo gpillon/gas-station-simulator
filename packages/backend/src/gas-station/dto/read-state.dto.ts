@@ -16,13 +16,45 @@ class FuelDispensed {
 }
 
 class FuelCapacity {
-  @ApiProperty({ example: 1000 })
+  @ApiProperty({
+    example: 1000,
+    description: 'Regular Fuel capacity in Liters ',
+  })
   regular: number;
-  @ApiProperty({ example: 1000 })
+  @ApiProperty({
+    example: 1000,
+    description: 'Midgrade Fuel capacity in Liters',
+  })
   midgrade: number;
-  @ApiProperty({ example: 1000 })
+  @ApiProperty({
+    example: 1000,
+    description: 'Premium Fuel capacity in Liters',
+  })
   premium: number;
-  @ApiProperty({ example: 1000 })
+  @ApiProperty({ example: 1000, description: 'Diesel Fuel capacity in Liters' })
+  diesel: number;
+}
+
+class FuelBuyPrices {
+  @ApiProperty({
+    example: 1000,
+    description: 'Regular Fuel buy price in Liters ',
+  })
+  regular: number;
+  @ApiProperty({
+    example: 1000,
+    description: 'Midgrade Fuel buy price in Liters',
+  })
+  midgrade: number;
+  @ApiProperty({
+    example: 1000,
+    description: 'Premium Fuel buy price in Liters',
+  })
+  premium: number;
+  @ApiProperty({
+    example: 1000,
+    description: 'Diesel Fuel buy price in Liters',
+  })
   diesel: number;
 }
 
@@ -37,7 +69,7 @@ class RefillingFuels {
   diesel: number;
 }
 
-class Pump implements PumpT {
+export class ReadPumpDto implements PumpT {
   @ApiProperty({ example: 1 })
   id: number;
   @ApiProperty({ example: 'idle' })
@@ -49,8 +81,8 @@ class Pump implements PumpT {
 }
 
 export class ReadStateDto implements SimulationState {
-  @ApiProperty({ description: 'Array of pump states', type: [Pump] })
-  pumps: Pump[];
+  @ApiProperty({ description: 'Array of pump states', type: [ReadPumpDto] })
+  pumps: ReadPumpDto[];
 
   @ApiProperty({
     description: 'Queue of vehicles waiting',
@@ -74,10 +106,53 @@ export class ReadStateDto implements SimulationState {
   totalRevenue: number;
 
   @ApiProperty({
+    description: 'Whether the vehicles are auto-refilling',
+    example: false,
+    type: Boolean,
+  })
+  vehiclesAutoRefill: boolean;
+
+  @ApiProperty({
+    description: 'Whether the tanks are auto-refilling',
+    example: false,
+    type: Boolean,
+  })
+  tanksAutoRefill: boolean;
+
+  @ApiProperty({
+    description: 'Whether the prices are auto-adjusting',
+    example: false,
+    type: Boolean,
+  })
+  autoAdjustPrices: boolean;
+
+  @ApiProperty({
     description: 'Whether the simulation is currently running',
     example: true,
   })
   isSimulationRunning: boolean;
+
+  @ApiProperty({
+    description: 'Size of the queue',
+    example: 10,
+  })
+  queueSize: number;
+
+  @ApiProperty({
+    description: 'Vehicles per second',
+    example: 0.3,
+    minimum: 0,
+    maximum: 2,
+  })
+  vehiclesPerSecond: number;
+
+  @ApiProperty({
+    description: 'Chance per second of vehicle start refill',
+    example: 0.25,
+    minimum: 0,
+    maximum: 1,
+  })
+  chanchePerSecondOfVehicleStartRefill: number;
 
   @ApiProperty({
     description: 'Amount of fuel dispensed for each type',
@@ -99,4 +174,7 @@ export class ReadStateDto implements SimulationState {
 
   @ApiProperty({ description: 'Current fuel prices', type: ReadPricesDto })
   fuelPrices: ReadPricesDto;
+
+  @ApiProperty({ description: 'Current fuel buy prices', type: FuelBuyPrices })
+  fuelBuyPrices: FuelBuyPrices;
 }

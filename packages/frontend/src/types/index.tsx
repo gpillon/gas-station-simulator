@@ -12,9 +12,18 @@ export interface Vehicle {
     currentVehicle: Vehicle | null;
     selectedGasoline: string | null;
 }
+
+export interface SimulationSettings {
+    vehiclesAutoRefill: boolean;
+    tanksAutoRefill: boolean;
+    autoAdjustPrices: boolean;
+    chanchePerSecondOfVehicleStartRefill: number;
+    queueSize: number;
+    vehiclesPerSecond: number;
+  }
   
   // ... other types remain the same
-  export interface SimulationState {
+  export interface SimulationState extends SimulationSettings {
     pumps: Pump[];
     queue: Vehicle[];
     vehiclesServed: number;
@@ -22,6 +31,7 @@ export interface Vehicle {
     trucksServed: number;
     averageWaitTime: number;
     totalRevenue: number;
+    queueSize: number;
     isSimulationRunning: boolean;
     fuelDispensed: {
       regular: number;
@@ -42,6 +52,12 @@ export interface Vehicle {
       diesel: number;
     };
     fuelPrices: {
+      regular: number;
+      midgrade: number;
+      premium: number;
+      diesel: number;
+    };
+    fuelBuyPrices: {
       regular: number;
       midgrade: number;
       premium: number;

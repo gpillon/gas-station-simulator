@@ -77,7 +77,7 @@ const GasStation: React.FC<Props> = ({ state, onSelectGasoline, socket, refillFu
           />
         ))}
       </div>
-      <Queue vehicles={state.queue} />
+      <Queue vehicles={state.queue} state={state} />
       <FuelPrices prices={state.fuelPrices} />  {/* Add this line */}
       {isModalOpen && (
         <FuelStatisticsModal 

@@ -22,7 +22,17 @@ export const GasolineType = [
 ] as const;
 export type GasolineTypeT = (typeof GasolineType)[number];
 
-export interface SimulationState {
+export type SimulationSettings = {
+  vehiclesAutoRefill: boolean;
+  tanksAutoRefill: boolean;
+  autoAdjustPrices: boolean;
+  isSimulationRunning: boolean;
+  queueSize: number;
+  vehiclesPerSecond: number;
+  chanchePerSecondOfVehicleStartRefill: number;
+};
+
+export interface SimulationState extends SimulationSettings {
   pumps: Pump[];
   queue: Vehicle[];
   vehiclesServed: number;
@@ -30,7 +40,6 @@ export interface SimulationState {
   trucksServed: number;
   averageWaitTime: number;
   totalRevenue: number;
-  isSimulationRunning: boolean;
   fuelDispensed: {
     regular: number;
     midgrade: number;
@@ -50,6 +59,12 @@ export interface SimulationState {
     diesel: number;
   };
   fuelPrices: {
+    regular: number;
+    midgrade: number;
+    premium: number;
+    diesel: number;
+  };
+  fuelBuyPrices: {
     regular: number;
     midgrade: number;
     premium: number;

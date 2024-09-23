@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Vehicle from './Vehicle';
-import { Vehicle as VehicleType } from '../types';
+import { SimulationState, Vehicle as VehicleType } from '../types';
 
 interface Props {
   vehicles: VehicleType[];
+  state: SimulationState;
 }
 
-const Queue: React.FC<Props> = ({ vehicles }) => {
-  const maxQueueSize = 9;
-  const emptySlots = Math.max(0, maxQueueSize - vehicles.length);
+const Queue: React.FC<Props> = ({ vehicles, state }) => {
+  const [queueSize, setQueueSize] = useState(state.queueSize || 9);
+  const [emptySlots, setEmptySlots] = useState(0);
+  useEffect(() => {
+    setQueueSize(state.queueSize || 9);
+    setEmptySlots(Math.max(0, queueSize - vehicles.length));
+  }, [state, queueSize, vehicles]);
+
+  // const emptySlots = Math.max(0, queueSize - vehicles.length);
 
   return (
     <div className="queue mt-8">

@@ -1,12 +1,22 @@
 import React from 'react';
 import { SimulationState } from '../types';
-import { StatItem, RefillLink } from './StatisticsPanel';
+import { StatItem } from './StatisticsPanel';
 
 interface Props {
   state: SimulationState;
   onClose: () => void;
   refillFuel: (amount: number, gasolineType: string) => void;
 }
+
+const RefillLink: React.FC<{ onClick: () => void, fuelBuyPrice :number }> = ({ onClick, fuelBuyPrice }) => (
+  <button
+    onClick={onClick}
+    className="ml-2 text-xs text-blue-600 hover:text-blue-800 underline focus:outline-none"
+  >
+    (refill {fuelBuyPrice.toFixed(3)} €/L)
+  </button>
+);
+
 
 const FuelStatisticsModal: React.FC<Props> = ({ state, onClose, refillFuel }) => {
   const handleRefill = (fuelType: string) => {
@@ -28,25 +38,25 @@ const FuelStatisticsModal: React.FC<Props> = ({ state, onClose, refillFuel }) =>
         <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Fuel Capacity (Liters)</h3>
         <div className="grid grid-cols-2 gap-6">
           <StatItem 
-            title={<>Regular <RefillLink onClick={() => handleRefill('regular')} /></>}
+            title={<>Regular <RefillLink onClick={() => handleRefill('regular')} fuelBuyPrice={state.fuelBuyPrices.regular} /></>}
             value={state.fuelCapacity.regular} 
             format={n => `${n.toFixed(2)} L`} 
             textColor={getFuelColor(state.fuelCapacity.regular)}
           />
           <StatItem 
-            title={<>Mid-Grade <RefillLink onClick={() => handleRefill('midgrade')} /></>}
+            title={<>Mid-Grade <RefillLink onClick={() => handleRefill('midgrade')} fuelBuyPrice={state.fuelBuyPrices.midgrade} /></>}
             value={state.fuelCapacity.midgrade} 
             format={n => `${n.toFixed(2)} L`} 
             textColor={getFuelColor(state.fuelCapacity.midgrade)}
           />
           <StatItem 
-            title={<>Premium <RefillLink onClick={() => handleRefill('premium')} /></>}
+            title={<>Premium <RefillLink onClick={() => handleRefill('premium')} fuelBuyPrice={state.fuelBuyPrices.premium} /></>}
             value={state.fuelCapacity.premium} 
             format={n => `${n.toFixed(2)} L`} 
             textColor={getFuelColor(state.fuelCapacity.premium)}
           />
           <StatItem 
-            title={<>Diesel <RefillLink onClick={() => handleRefill('diesel')} /></>}
+            title={<>Diesel <RefillLink onClick={() => handleRefill('diesel')} fuelBuyPrice={state.fuelBuyPrices.diesel} /></>}
             value={state.fuelCapacity.diesel} 
             format={n => `${n.toFixed(2)} L`} 
             textColor={getFuelColor(state.fuelCapacity.diesel)}

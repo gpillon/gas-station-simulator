@@ -80,7 +80,7 @@ const Pump: React.FC<Props> = ({ state, pump, onSelectGasoline, socket, fuelCapa
                 className={`w-full aspect-square max-w-[500px] relative overflow-hidden rounded-md `}
               >
                 <img 
-                  src={gasolineTypes.find(type => type.name === pump.selectedGasoline)?.icon} 
+                  src={gasolineTypes.find(type => type.capacityKey === pump.selectedGasoline?.toLowerCase().replace('-', '') as keyof typeof gasolineTypes)?.icon} 
                   alt={pump.selectedGasoline} 
                   className="w-full h-full object-cover"
                 />

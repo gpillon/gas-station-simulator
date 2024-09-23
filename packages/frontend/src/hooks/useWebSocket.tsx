@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import io, { Socket } from 'socket.io-client';
-import { SimulationState } from '../types';
+import { SimulationSettings, SimulationState } from '../types';
 import refuelingCompleteSound from '../assets/sounds/refueling-complete.mp3';
 import { getBackendHost } from '../utils/getBackendUrls';
 
@@ -15,6 +15,12 @@ const useWebSocket = () => {
     averageWaitTime: 0,
     totalRevenue: 0,
     isSimulationRunning: false,
+    vehiclesAutoRefill: false,
+    tanksAutoRefill: false,
+    queueSize: 9,
+    chanchePerSecondOfVehicleStartRefill: 0.25,
+    vehiclesPerSecond: 0.3,
+    autoAdjustPrices: false,
     fuelDispensed: {
       regular: 0,
       midgrade: 0,
@@ -34,6 +40,12 @@ const useWebSocket = () => {
       diesel: 0,
     },
     fuelPrices: {
+      regular: 0,
+      midgrade: 0,
+      premium: 0,
+      diesel: 0,
+    },
+    fuelBuyPrices: {
       regular: 0,
       midgrade: 0,
       premium: 0,
@@ -125,9 +137,16 @@ const useWebSocket = () => {
       console.log(`Sending refill command: ${amount} ${gasolineType}`);
       socket.emit('refillFuel', { amount, gasolineType });
     }
+  }, [socket]); 
+
+  const setSimulationSettings = useCallback((settings: Partial<SimulationSettings>) => {
+    if (socket) {
+      console.log(`Sending Settings: ${JSON.stringify(settings)}`);
+      socket.emit('simulationSettings', settings);
+    }
   }, [socket]);
 
-  return { state, sendCommand, selectGasoline, socket, refillFuel };
+  return { state, sendCommand, selectGasoline, socket, refillFuel, setSimulationSettings };
 };
 
 export default useWebSocket;

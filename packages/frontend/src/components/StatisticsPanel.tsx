@@ -24,15 +24,6 @@ export const AnimatedValue: React.FC<{ value: number; format: (n: number) => str
   return <animated.span>{props.val.to(val => format(val))}</animated.span>;
 };
 
-export const RefillLink: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <button
-    onClick={onClick}
-    className="ml-2 text-xs text-blue-600 hover:text-blue-800 underline focus:outline-none"
-  >
-    (refill)
-  </button>
-);
-
 const StatisticsPanel: React.FC<Props> = ({ state, onClose }) => {
 
 
