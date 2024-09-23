@@ -11,6 +11,8 @@
     "@types/react": "^18.3.8",
     "@types/react-dom": "^18.3.0",
     "frontend": "file:",
+    "qrcode": "~1.5.4",
+    "qrcode.react": "~4.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "~6.26.2",
@@ -18,9 +20,7 @@
     "react-spring": "~9.7.4",
     "socket.io-client": "~4.7.5",
     "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4",
-    "qrcode": "~1.5.4",
-    "qrcode.react": "~4.0.1"
+    "web-vitals": "^2.1.4"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
@@ -35,7 +35,7 @@
   },
   "scripts": {
     "start": "cross-env PORT=3001 react-scripts start",
-    "build": "PROD_BUILD=true REACT_APP_SOCKET_HOST=REACT_APP_SOCKET_SERVER_URL_PLACEHOLDER react-scripts build",
+    "build": "cross-env PROD_BUILD=true REACT_APP_SOCKET_HOST=REACT_APP_SOCKET_SERVER_URL_PLACEHOLDER react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
