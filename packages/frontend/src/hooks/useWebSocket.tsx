@@ -146,7 +146,18 @@ const useWebSocket = () => {
     }
   }, [socket]);
 
-  return { state, sendCommand, selectGasoline, socket, refillFuel, setSimulationSettings };
+  const generateQrPaymentId = useCallback(( pumpId: number ): string | null => {
+    if (socket) {
+      const paymentId = Math.random().toString(36).substring(2, 11);
+      socket.emit('qrPaymentId', {pumpId, paymentId});
+      return paymentId;
+    }
+    return null;
+  }, [socket]);
+
+  return { state, sendCommand, selectGasoline, socket, refillFuel, setSimulationSettings, generateQrPaymentId };
+
+
 };
 
 export default useWebSocket;

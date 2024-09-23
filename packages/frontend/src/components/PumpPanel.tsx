@@ -4,6 +4,8 @@ import { Socket } from 'socket.io-client';
 import thanksImage from '../assets/images/thanks.png';
 import { SimulationState } from '../types';
 import { AnimatedValue } from './StatisticsPanel';
+import { QRCodeCanvas } from 'qrcode.react';
+import useWebSocket from '../hooks/useWebSocket';
 
 interface RefuelingCompletePayload {
   pumpId: number;
@@ -40,8 +42,18 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
     fuelDispensed: 0,
     currentExpense: 0,
   });
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+
+  const { generateQrPaymentId } = useWebSocket()
 
   const paymentMethods = ['Cash', 'Credit Card', 'Debit Card'];
+
+  const generateQRCodeUrl = () => {
+    const paymentId = generateQrPaymentId(pumpId);
+    const paymentUrl = `${window.location.origin}/payment/${pumpId}/${paymentId}`;
+    setQrCodeUrl(paymentUrl);
+  };
+  
 
   useEffect(() => {
     if (socket) {
@@ -58,6 +70,17 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
           setTimeout(() => {
             onClose();
           }, 3000);
+        }
+      });
+
+      socket.on('paymentUpdate', (data: { pumpId: number }) => {
+        if (data.pumpId === pumpId) {
+          setState(prevState => ({
+            ...prevState,
+            paymentMethod: "Qr Code",
+            isProcessingPayment: false,
+            transactionStatus: 'Qr Code Payment processed. Please select fuel type.',
+          }));
         }
       });
 
@@ -79,6 +102,7 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
     return () => {
       if (socket) {
         socket.off('refuelingComplete');
+        socket.off('paymentUpdate');
         socket.off('refuelingUpdate');
       }
     };
@@ -93,14 +117,21 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
       transactionStatus: `Processing ${payment.toLowerCase()}...`,
     }));
 
-    setTimeout(() => {
-      setState(prevState => ({
-        ...prevState,
-        isProcessingPayment: false,
-        transactionStatus: `${payment} accepted. Please select fuel type.`,
-      }));
-    }, 2000);
+    if (payment === 'QR Code') {
+      generateQRCodeUrl();
+    } else {
+      setTimeout(() => {
+        setState(prevState => ({
+          ...prevState,
+          isProcessingPayment: false,
+          transactionStatus: `${payment} accepted. Please select fuel type.`,
+        }));
+      }, 2000);
+    }
+    
   };
+
+
 
   const handleFuelSelect = (fuelType: string) => {
     const fuel = fuelType.replace('-', '');
@@ -155,7 +186,7 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
               <div>
                 <h3 className="text-xl mb-4 md:hidden">Select Payment Method:</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {paymentMethods.map((method) => (
+                  {[...paymentMethods, 'QR Code'].map((method) => (
                     <button
                       key={method}
                       onClick={() => handlePaymentSelect(method)}
@@ -166,11 +197,17 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
                   ))}
                 </div>
               </div>
+            ) : state.paymentMethod === 'QR Code' && qrCodeUrl ? (
+              <div className="flex flex-col items-center">
+                <h3 className="text-xl mb-4">Scan QR Code to Pay</h3>
+                < QRCodeCanvas value={qrCodeUrl} size={256} />
+                <p className="mt-4 text-sm text-gray-600">Scan this code with your phone to process the payment or click <a href={qrCodeUrl} target="_blank" rel="noopener noreferrer">here</a></p>
+              </div>
             ) : !state.fuelType && !state.isProcessingPayment ? (
               <div className="h-full flex flex-col justify-between">
                 <h4 className="text-lg mb-2 md:hidden">Select Fuel Type:</h4>
                 <div className="grid grid-cols-2 gap-8 justify-items-center content-between h-full py-8">
-                  {gasolineTypes.map((fuel) => {
+                {gasolineTypes.map((fuel) => {
                     const fuelPrice = gasStationState.fuelPrices[fuel.name.replace('-', '').toLowerCase() as keyof typeof gasStationState.fuelPrices];
                     return (
                       <button
@@ -239,3 +276,4 @@ const PumpPanel: React.FC<PumpPanelProps> = ({
 };
 
 export default PumpPanel;
+                          

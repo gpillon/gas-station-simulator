@@ -1,10 +1,12 @@
 import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Controls from './components/Controls';
 import GasStation from './components/GasStation';
 import Statistics from './components/Statistics';
 import useWebSocket from './hooks/useWebSocket';
+import PaymentPage from './components/PaymentPage';
 
-const App: React.FC = () => {
+const MainApp: React.FC = () => {
   const { state, sendCommand, selectGasoline, socket, refillFuel } = useWebSocket();
 
   return (
@@ -22,12 +24,23 @@ const App: React.FC = () => {
           <Statistics state={state} />
           <Controls 
             state={state}
-          sendCommand={sendCommand}
-          isSimulationRunning={state.isSimulationRunning}
-        />
+            sendCommand={sendCommand}
+            isSimulationRunning={state.isSimulationRunning}
+          />
         </div>
       </div>
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainApp />} />
+        <Route path="/payment/:pumpId/:paymentId" element={<PaymentPage />} />
+      </Routes>
+    </Router>
   );
 };
 
