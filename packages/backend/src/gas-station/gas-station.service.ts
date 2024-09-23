@@ -242,6 +242,7 @@ export class GasStationService {
           pump.currentVehicle.currentFuel += fuelAmount;
           this.state.fuelCapacity[fuelType] -= fuelAmount;
           this.state.fuelDispensed[fuelType] += fuelAmount;
+          this.stateUpdates.next(this.state);
         }
         if (
           pump.currentVehicle.currentFuel >= pump.currentVehicle.tankCapacity
