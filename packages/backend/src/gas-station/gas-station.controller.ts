@@ -66,9 +66,7 @@ export class GasStationController {
       +payment.pumpId,
       payment.paymentId,
     );
-    if (result.ok) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    } else {
+    if (!result.ok) {
       throw new BadRequestException(
         'Payment failed, paymentId: ' + payment.paymentId,
       );

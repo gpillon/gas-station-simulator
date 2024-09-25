@@ -9,7 +9,7 @@ export class AppController {
 
   @Get('/healthz')
   @ApiHideProperty()
-  getHealt(): string {
+  getHealth(): string {
     return 'ok';
   }
 
