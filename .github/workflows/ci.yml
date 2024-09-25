@@ -35,6 +35,12 @@ jobs:
       - name: Rush rebuild
         run: node common/scripts/install-run-rush.js rebuild --verbose
 
+      - name: Rush Test Backend
+        run: | 
+          cd packages/backend 
+          node ../../common/scripts/install-run-rushx.js test --ci
+          npm run test:e2e
+
       - name: Extract version or set default
         id: get_version
         shell: bash
